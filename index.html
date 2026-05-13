@@ -9,17 +9,17 @@
         :root { --bg: #020205; --accent: #00ff41; --glass: rgba(5, 12, 5, 0.95); --text: #ffffff; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; overflow: hidden; }
         #snakeCanvas { position: fixed; top: 0; left: 0; z-index: 1; background: #010401; }
-        .main-interface { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 255, 65, 0.2); border-radius: 40px; padding: 40px; width: 320px; text-align: center; box-shadow: 0 0 100px rgba(0, 255, 65, 0.1); }
-        h1 { font-size: 1.1rem; letter-spacing: 5px; margin-bottom: 30px; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 10px var(--accent); }
-        .data-card { background: rgba(0, 0, 0, 0.7); border-radius: 20px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #008f11; transition: 0.3s; }
-        .data-card.active { border-left-color: var(--accent); transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
+        .main-interface { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 255, 65, 0.2); border-radius: 40px; padding: 35px; width: 300px; text-align: center; box-shadow: 0 0 100px rgba(0, 255, 65, 0.1); }
+        h1 { font-size: 1rem; letter-spacing: 4px; margin-bottom: 25px; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 10px var(--accent); }
+        .data-card { background: rgba(0, 0, 0, 0.7); border-radius: 20px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #008f11; }
+        .data-card.active { border-left-color: var(--accent); transform: scale(1.02); }
         .label { font-size: 0.6rem; color: #008f11; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .num { font-size: 2.5rem; font-weight: 800; color: #fff; line-height: 1; }
+        .num { font-size: 2.2rem; font-weight: 800; color: #fff; line-height: 1; }
         .unit { color: var(--accent); font-size: 0.8rem; margin-left: 5px; }
         .btn-start { width: 100%; padding: 18px; border-radius: 12px; background: transparent; border: 2px solid var(--accent); color: var(--accent); font-family: inherit; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; position: relative; overflow: hidden; }
         .btn-start:hover:not(:disabled) { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
         .btn-start:disabled { opacity: 0.3; }
-        .loader-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width 0.3s; }
+        .loader-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--accent); transition: width 0.2s; }
     </style>
 </head>
 <body>
@@ -29,7 +29,7 @@
 <div class="main-interface">
     <h1>speedtestBOGDAN</h1>
     <div id="pCard" class="data-card"><span class="label">Ping</span><span id="pRes" class="num">0</span><span class="unit">ms</span></div>
-    <div id="sCard" class="data-card"><span class="label">Download</span><span id="sRes" class="num">0</span><span id="sUnit" class="unit">Mbps</span></div>
+    <div id="sCard" class="data-card"><span class="label">Speed</span><span id="sRes" class="num">0</span><span id="sUnit" class="unit">Mbps</span></div>
     <button id="run" class="btn-start">Execute<div id="fill" class="loader-bar" style="width: 0%"></div></button>
 </div>
 
@@ -39,31 +39,33 @@
     const pRes = document.getElementById('pRes');
     const fill = document.getElementById('fill');
 
-    // ИСПОЛЬЗУЕМ БОЛЕЕ СТАБИЛЬНЫЙ РАЗМЕР ДЛЯ ТЕСТА БЕЗ VPN
-    const testUrl = "https://speed.cloudflare.com/__down?bytes=25000000"; 
+    // УМЕНЬШИЛИ ДО 5 МБ ДЛЯ СЛАБОГО ИНТЕРНЕТА
+    const testSize = 5000000;
+    const testUrl = "https://speed.cloudflare.com/__down?bytes=" + testSize;
 
     async function startTest() {
         runBtn.disabled = true;
         fill.style.width = "0%";
         sRes.innerText = "0";
+        pRes.innerText = "...";
         
-        // PING
+        // PING (БЫСТРЫЙ ЗАМЕР)
         document.getElementById('pCard').classList.add('active');
         try {
-            const results = [];
-            for(let i=0; i<3; i++) {
-                const start = performance.now();
-                await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
-                results.push(performance.now() - start);
-            }
-            pRes.innerText = Math.min(...results).toFixed(0);
-        } catch { pRes.innerText = "--"; }
+            const start = performance.now();
+            await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
+            pRes.innerText = (performance.now() - start).toFixed(0);
+        } catch { pRes.innerText = "??"; }
         document.getElementById('pCard').classList.remove('active');
 
         // SPEED TEST
         document.getElementById('sCard').classList.add('active');
+        
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000); // ТАЙМАУТ 15 СЕКУНД
+
         try {
-            const response = await fetch(testUrl + "&cb=" + Date.now());
+            const response = await fetch(testUrl + "&cb=" + Date.now(), { signal: controller.signal });
             const reader = response.body.getReader();
             const startTime = performance.now();
             let received = 0;
@@ -74,16 +76,16 @@
                 received += value.length;
                 const duration = (performance.now() - startTime) / 1000;
                 
-                if (duration > 0.1) {
-                    // ПЕРЕВОД В МЕГАБИТЫ (bits / duration / 10^6)
+                if (duration > 0.05) {
                     const mbps = (received * 8 / duration) / 1000000;
-                    sRes.innerText = mbps.toFixed(1);
-                    fill.style.width = Math.min((received / 25000000) * 100, 100) + "%";
+                    sRes.innerText = mbps < 1 ? mbps.toFixed(2) : mbps.toFixed(1);
+                    fill.style.width = Math.min((received / testSize) * 100, 100) + "%";
                 }
             }
+            clearTimeout(timeout);
         } catch (e) {
             sRes.innerText = "ERR";
-            console.error("ОШИБКА СЕТИ. ВОЗМОЖНО, НУЖЕН VPN ДЛЯ CLOUDFLARE.");
+            console.log("ТЕСТ ПРЕРВАН ИЛИ СЛИШКОМ МЕДЛЕННЫЙ");
         }
 
         document.getElementById('sCard').classList.remove('active');
@@ -93,7 +95,7 @@
 
     runBtn.addEventListener('click', startTest);
 
-    // ЗЕЛЕНАЯ ЗМЕЙКА С БЕСКОНЕЧНОЙ ЕДОЙ
+    // ЗЕЛЕНАЯ ЗМЕЙКА (МНОГО ЕДЫ)
     const canvas = document.getElementById('snakeCanvas');
     const ctx = canvas.getContext('2d');
     const tile = 22;
@@ -108,13 +110,10 @@
     function draw() {
         const w = Math.floor(canvas.width / tile);
         const h = Math.floor(canvas.height / tile);
-        
         ctx.fillStyle = "#010401";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         const head = {...snake[0]};
-        
-        // AI: ПОИСК БЛИЖАЙШЕЙ ЦЕЛИ
         let target = foods[0];
         let minDist = 10000;
         foods.forEach(f => {
@@ -137,19 +136,16 @@
         });
 
         if (ate) {
-            // ПЛОДИМ ЕДУ
             for(let i=0; i<2; i++) foods.push({ x: Math.floor(Math.random() * w), y: Math.floor(Math.random() * h) });
         } else {
             snake.pop();
         }
 
-        // РИСУЕМ ЕДУ (КРАСНЫЙ ПУЛЬС)
         ctx.fillStyle = "#ff003c";
         ctx.shadowBlur = 15;
         ctx.shadowColor = "#ff003c";
         foods.forEach(f => ctx.fillRect(f.x * tile + 4, f.y * tile + 4, tile - 8, tile - 8));
 
-        // РИСУЕМ ЗМЕЮ (ЯДОВИТО-ЗЕЛЕНЫЙ)
         ctx.shadowBlur = 10;
         ctx.shadowColor = "#00ff41";
         snake.forEach((p, i) => {
@@ -158,7 +154,6 @@
         });
         ctx.shadowBlur = 0;
     }
-
     setInterval(draw, 60);
 </script>
 </body>
