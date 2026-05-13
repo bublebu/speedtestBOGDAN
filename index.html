@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>speedtestBOGDAN</title>
 
 <style>
@@ -13,7 +12,6 @@
     --bg:#020205;
     --accent:#00ff41;
     --red:#ff003c;
-    --glass:rgba(5,12,5,.95);
 }
 
 *{
@@ -30,8 +28,9 @@ body{
 
     background:var(--bg);
 
-    font-family:'JetBrains Mono', monospace;
     color:white;
+
+    font-family:'JetBrains Mono', monospace;
 }
 
 body{
@@ -40,22 +39,14 @@ body{
     align-items:center;
 }
 
-/* =========================
-   CANVAS
-========================= */
-
 #snakeCanvas{
     position:fixed;
     inset:0;
-    z-index:1;
     background:#010401;
+    z-index:1;
 }
 
-/* =========================
-   UI
-========================= */
-
-.interface{
+.panel{
     position:relative;
     z-index:10;
 
@@ -65,15 +56,15 @@ body{
 
     border-radius:35px;
 
-    background:var(--glass);
+    background:rgba(5,12,5,.94);
 
-    backdrop-filter:blur(25px);
+    backdrop-filter:blur(20px);
 
     border:1px solid rgba(0,255,65,.15);
 
     box-shadow:
-        0 0 70px rgba(0,255,65,.08),
-        inset 0 0 30px rgba(0,255,65,.04);
+        0 0 80px rgba(0,255,65,.08),
+        inset 0 0 30px rgba(0,255,65,.03);
 }
 
 .title{
@@ -81,18 +72,16 @@ body{
 
     color:var(--accent);
 
-    letter-spacing:5px;
-
     font-size:.9rem;
+
+    letter-spacing:5px;
 
     margin-bottom:25px;
 
-    text-shadow:0 0 10px var(--accent);
+    text-shadow:0 0 12px var(--accent);
 }
 
 .card{
-    position:relative;
-
     background:rgba(0,0,0,.65);
 
     border-left:4px solid #008f11;
@@ -102,8 +91,6 @@ body{
     padding:18px;
 
     margin-bottom:14px;
-
-    overflow:hidden;
 }
 
 .label{
@@ -125,7 +112,7 @@ body{
 
 .unit{
     color:var(--accent);
-    font-size:.8rem;
+    font-size:.75rem;
 }
 
 button{
@@ -136,7 +123,8 @@ button{
     padding:17px;
 
     border:none;
-    border-radius:15px;
+
+    border-radius:14px;
 
     background:transparent;
 
@@ -145,6 +133,7 @@ button{
     color:var(--accent);
 
     font-family:inherit;
+
     font-weight:800;
 
     cursor:pointer;
@@ -161,8 +150,7 @@ button:hover:not(:disabled){
 }
 
 button:disabled{
-    opacity:.6;
-    cursor:not-allowed;
+    opacity:.5;
 }
 
 .loader{
@@ -184,9 +172,11 @@ button:disabled{
 
 <canvas id="snakeCanvas"></canvas>
 
-<div class="interface">
+<div class="panel">
 
-    <div class="title">speedtestBOGDAN</div>
+    <div class="title">
+        speedtestBOGDAN
+    </div>
 
     <div class="card">
         <span class="label">PING</span>
@@ -202,7 +192,7 @@ button:disabled{
         <span class="unit">Mbps</span>
     </div>
 
-    <button id="start">
+    <button id="startBtn">
         EXECUTE
         <div id="loader" class="loader"></div>
     </button>
@@ -214,57 +204,73 @@ button:disabled{
    ELEMENTS
 ========================= */
 
-const startBtn = document.getElementById("start");
+const startBtn =
+    document.getElementById("startBtn");
 
-const pingEl = document.getElementById("ping");
+const pingEl =
+    document.getElementById("ping");
 
-const speedEl = document.getElementById("speed");
+const speedEl =
+    document.getElementById("speed");
 
-const loader = document.getElementById("loader");
+const loader =
+    document.getElementById("loader");
 
 /* =========================
-   FILES
+   РАБОТАЮЩИЕ URL ДЛЯ РФ
 ========================= */
 
 /*
-    Работает на GitHub Pages
-    и не ломается из-за CORS
+    jsDelivr и GitHub у многих
+    в РФ режутся или тормозят.
+
+    cloudflare.com почти всегда работает.
 */
 
 const PING_URL =
-    "https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js";
+    "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js";
+
+/*
+    cachefly.cloudflare.com
+    обычно доступен в РФ.
+*/
 
 const DOWNLOAD_URL =
-    "https://proof.ovh.net/files/100Mb.dat";
+    "https://cachefly.cachefly.net/100mb.test";
 
 /* =========================
-   PING TEST
+   PING
 ========================= */
 
 async function pingTest(){
 
     const samples = [];
 
-    for(let i = 0; i < 4; i++){
+    for(let i = 0; i < 3; i++){
 
         try{
 
-            const start = performance.now();
+            const start =
+                performance.now();
 
             await fetch(
-                PING_URL + "?cache=" + Math.random(),
+                PING_URL +
+                "?cache=" +
+                Math.random(),
                 {
+                    mode:"cors",
                     cache:"no-store"
                 }
             );
 
-            const end = performance.now();
+            const ping =
+                performance.now() - start;
 
-            samples.push(end - start);
+            samples.push(ping);
 
         }catch(e){
 
-            console.log("PING ERROR");
+            console.log("PING FAIL");
         }
     }
 
@@ -283,26 +289,32 @@ async function pingTest(){
 }
 
 /* =========================
-   DOWNLOAD TEST
+   SPEED TEST
 ========================= */
 
-async function downloadTest(){
+async function speedTest(){
 
     try{
 
-        const response = await fetch(
-            DOWNLOAD_URL + "?cache=" + Date.now(),
-            {
-                cache:"no-store"
-            }
-        );
+        const response =
+            await fetch(
+                DOWNLOAD_URL +
+                "?cache=" +
+                Date.now(),
+                {
+                    mode:"cors",
+                    cache:"no-store"
+                }
+            );
 
         const reader =
             response.body.getReader();
 
         const total =
             Number(
-                response.headers.get("content-length")
+                response.headers.get(
+                    "content-length"
+                )
             ) || 100000000;
 
         let received = 0;
@@ -324,24 +336,26 @@ async function downloadTest(){
                 / 1000;
 
             const mbps =
-                ((received * 8) / seconds)
+                (
+                    (received * 8)
+                    / seconds
+                )
                 / 1024
                 / 1024;
 
             speedEl.innerText =
                 mbps.toFixed(2);
 
-            const progress =
-                (received / total) * 100;
-
             loader.style.width =
-                Math.min(progress,100)
-                + "%";
+                Math.min(
+                    (received / total) * 100,
+                    100
+                ) + "%";
         }
 
     }catch(e){
 
-        console.log(e);
+        console.error(e);
 
         speedEl.innerText = "ERR";
     }
@@ -351,7 +365,7 @@ async function downloadTest(){
    START
 ========================= */
 
-async function startTest(){
+async function run(){
 
     startBtn.disabled = true;
 
@@ -363,7 +377,7 @@ async function startTest(){
 
     await pingTest();
 
-    await downloadTest();
+    await speedTest();
 
     startBtn.disabled = false;
 
@@ -373,7 +387,7 @@ async function startTest(){
 
 startBtn.addEventListener(
     "click",
-    startTest
+    run
 );
 
 /* =========================
@@ -433,14 +447,13 @@ function updateSnake(){
     for(const food of foods){
 
         const dist =
-            Math.abs(food.x - head.x)
+            Math.abs(head.x - food.x)
             +
-            Math.abs(food.y - head.y);
+            Math.abs(head.y - food.y);
 
         if(dist < minDist){
 
             minDist = dist;
-
             target = food;
         }
     }
