@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedTest by Mr. Dot</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 350px;
+        }
+
+        h1 { margin-bottom: 1.5rem; font-size: 1.5rem; color: var(--accent); }
+
+        .metric {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+
+        .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .unit { color: #94a3b8; font-size: 0.9rem; }
+
+        button {
+            background: var(--accent);
+            color: var(--bg);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button:hover:not(:disabled) { transform: scale(1.02); }
+
+        .status { margin-top: 15px; font-size: 0.8rem; color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Speed Test</h1>
+    
+    <div class="metric">
+        <span class="unit">Download</span>
+        <span id="speed" class="value">0.00</span>
+        <span class="unit">Mbps</span>
+    </div>
+
+    <div class="metric">
+        <span class="unit">Ping</span>
+        <span id="ping" class="value">0</span>
+        <span class="unit">ms</span>
+    </div>
+
+    <button id="startBtn">ЗАПУСТИТЬ ТЕСТ</button>
+    <p id="status" class="status">Готов к работе</p>
+</div>
+
+<script>
+    const startBtn = document.getElementById('startBtn');
+    const speedDisplay = document.getElementById('speed');
+    const pingDisplay = document.getElementById('ping');
+    const statusDisplay = document.getElementById('status');
+
+    // Ссылка на тестовый файл (примерно 10МБ для точности)
+    // Используем случайные параметры, чтобы обойти кэш
+    const testFile = "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=2526&auto=format&fit=crop"; 
+    const fileSizeInBits = 10 * 1024 * 1024 * 8; // Приблизительный вес в битах (зависит от ответа сервера)
+
+    async function runTest() {
+        startBtn.disabled = true;
+        statusDisplay.innerText = "Измеряем Ping...";
+        
+        // 1. Тест Ping
+        const pings = [];
+        for(let i=0; i<3; i++) {
+            const start = performance.now();
+            await fetch(window.location.href, { cache: 'no-store', mode: 'no-cors' });
+            pings.push(performance.now() - start);
+        }
+        const avgPing = Math.min(...pings).toFixed(0);
+        pingDisplay.innerText = avgPing;
+
+        // 2. Тест загрузки
+        statusDisplay.innerText = "Загружаем тестовые данные...";
+        const startTime = performance.now();
+        
+        try {
+            const response = await fetch(testFile + "&t=" + startTime, { cache: 'no-store' });
+            const reader = response.body.getReader();
+            let loaded = 0;
+
+            while(true) {
+                const {done, value} = await reader.read();
+                if (done) break;
+                loaded += value.length;
+                // Промежуточное обновление (опционально)
+            }
+
+            const endTime = performance.now();
+            const durationInSeconds = (endTime - startTime) / 1000;
+            const bitsLoaded = loaded * 8;
+            const speedMbps = (bitsLoaded / durationInSeconds / 1024 / 1024).toFixed(2);
+
+            speedDisplay.innerText = speedMbps;
+            statusDisplay.innerText = "Тест завершен!";
+        } catch (e) {
+            statusDisplay.innerText = "Ошибка замера. Попробуйте снова.";
+            console.error(e);
+        }
+
+        startBtn.disabled = false;
+    }
+
+    startBtn.addEventListener('click', runTest);
+</script>
+
+</body>
+</html>
