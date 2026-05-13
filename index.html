@@ -1,151 +1,493 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>speedtestBOGDAN</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap');
-        :root { --bg: #020205; --accent: #00ff41; --glass: rgba(5, 12, 5, 0.95); --text: #ffffff; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        #snakeCanvas { position: fixed; top: 0; left: 0; z-index: 1; background: #010401; }
-        .main-interface { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 255, 65, 0.2); border-radius: 40px; padding: 35px; width: 280px; text-align: center; box-shadow: 0 0 100px rgba(0, 255, 65, 0.1); }
-        h1 { font-size: 0.9rem; letter-spacing: 4px; margin-bottom: 25px; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 10px var(--accent); }
-        .data-card { background: rgba(0, 0, 0, 0.7); border-radius: 20px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #008f11; }
-        .label { font-size: 0.55rem; color: #008f11; text-transform: uppercase; margin-bottom: 5px; display: block; }
-        .num { font-size: 2rem; font-weight: 800; color: #fff; line-height: 1; }
-        .unit { color: var(--accent); font-size: 0.7rem; margin-left: 5px; }
-        .btn-start { width: 100%; padding: 16px; border-radius: 12px; background: transparent; border: 2px solid var(--accent); color: var(--accent); font-family: inherit; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; position: relative; overflow: hidden; }
-        .btn-start:hover:not(:disabled) { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
-        .btn-start:disabled { opacity: 0.3; }
-        .loader-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: var(--accent); transition: width 0.1s linear; }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>speedtestBOGDAN</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap');
+
+:root{
+    --bg:#020205;
+    --accent:#00ff41;
+    --glass:rgba(5,12,5,.95);
+    --text:#fff;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:var(--bg);
+    font-family:'JetBrains Mono', monospace;
+    color:var(--text);
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+#snakeCanvas{
+    position:fixed;
+    inset:0;
+    background:#010401;
+    z-index:1;
+}
+
+.main-interface{
+    position:relative;
+    z-index:10;
+
+    width:300px;
+
+    padding:35px;
+
+    border-radius:35px;
+
+    background:var(--glass);
+
+    backdrop-filter:blur(20px);
+
+    border:1px solid rgba(0,255,65,.15);
+
+    box-shadow:
+        0 0 60px rgba(0,255,65,.08),
+        inset 0 0 30px rgba(0,255,65,.03);
+}
+
+h1{
+    margin:0 0 25px;
+    text-align:center;
+    color:var(--accent);
+    letter-spacing:4px;
+    font-size:.9rem;
+    text-transform:uppercase;
+    text-shadow:0 0 10px var(--accent);
+}
+
+.data-card{
+    background:rgba(0,0,0,.7);
+
+    border-left:4px solid #008f11;
+
+    border-radius:20px;
+
+    padding:16px;
+
+    margin-bottom:12px;
+}
+
+.label{
+    display:block;
+    margin-bottom:6px;
+
+    color:#00a52a;
+
+    font-size:.55rem;
+
+    letter-spacing:2px;
+
+    text-transform:uppercase;
+}
+
+.num{
+    font-size:2rem;
+    font-weight:800;
+}
+
+.unit{
+    color:var(--accent);
+    font-size:.7rem;
+}
+
+.btn-start{
+    position:relative;
+
+    width:100%;
+
+    padding:16px;
+
+    overflow:hidden;
+
+    border:none;
+    border-radius:14px;
+
+    background:transparent;
+
+    border:2px solid var(--accent);
+
+    color:var(--accent);
+
+    font-family:inherit;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.btn-start:hover:not(:disabled){
+    background:var(--accent);
+    color:#000;
+    box-shadow:0 0 30px var(--accent);
+}
+
+.btn-start:disabled{
+    opacity:.5;
+    cursor:not-allowed;
+}
+
+.loader-bar{
+    position:absolute;
+    left:0;
+    bottom:0;
+
+    height:4px;
+    width:0%;
+
+    background:var(--accent);
+
+    transition:width .1s linear;
+}
+</style>
 </head>
 <body>
 
 <canvas id="snakeCanvas"></canvas>
 
 <div class="main-interface">
+
     <h1>speedtestBOGDAN</h1>
-    <div id="pCard" class="data-card"><span class="label">Ping</span><span id="pRes" class="num">0</span><span class="unit">ms</span></div>
-    <div id="sCard" class="data-card"><span class="label">Download</span><span id="sRes" class="num">0</span><span id="sUnit" class="unit">Mbps</span></div>
-    <button id="run" class="btn-start">Execute<div id="fill" class="loader-bar" style="width: 0%"></div></button>
+
+    <div class="data-card">
+        <span class="label">PING</span>
+        <span id="pingResult" class="num">0</span>
+        <span class="unit">ms</span>
+    </div>
+
+    <div class="data-card">
+        <span class="label">DOWNLOAD</span>
+        <span id="speedResult" class="num">0</span>
+        <span class="unit">Mbps</span>
+    </div>
+
+    <button id="startBtn" class="btn-start">
+        EXECUTE
+        <div id="loader" class="loader-bar"></div>
+    </button>
+
 </div>
 
 <script>
-    const runBtn = document.getElementById('run');
-    const sRes = document.getElementById('sRes');
-    const pRes = document.getElementById('pRes');
-    const fill = document.getElementById('fill');
+/* =========================
+   SPEED TEST
+========================= */
 
-    // ТЕПЕРЬ КАЧАЕМ ИЗ JSDELIVR (ОБЫЧНО НЕ БЛОКИРУЕТСЯ)
-    // ТУТ ПРИМЕРНО 1 МЕГАБАЙТ ДАННЫХ
-    const testUrl = "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js";
-    const testSizeInBits = 1050000 * 8; 
+const startBtn = document.getElementById("startBtn");
+const speedResult = document.getElementById("speedResult");
+const pingResult = document.getElementById("pingResult");
+const loader = document.getElementById("loader");
 
-    async function startTest() {
-        runBtn.disabled = true;
-        fill.style.width = "0%";
-        sRes.innerText = "0";
-        pRes.innerText = "...";
-        
-        // PING ЧЕРЕЗ GOOGLE (САМЫЙ НАДЕЖНЫЙ ВАРИАНТ)
-        try {
-            const start = performance.now();
-            await fetch("https://www.google.com/favicon.ico", { mode: 'no-cors', cache: 'no-store' });
-            pRes.innerText = (performance.now() - start).toFixed(0);
-        } catch { pRes.innerText = "??"; }
+/*
+    ВАЖНО:
+    Эти файлы работают на GitHub Pages,
+    потому что сервер разрешает CORS.
+*/
 
-        // SPEED TEST
-        try {
-            const startTime = performance.now();
-            const response = await fetch(testUrl + "?cb=" + startTime);
-            const reader = response.body.getReader();
-            let received = 0;
+const TEST_FILE =
+    "https://proof.ovh.net/files/100Mb.dat";
 
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                received += value.length;
-                const duration = (performance.now() - startTime) / 1000;
-                
-                if (duration > 0.05) {
-                    const mbps = (received * 8 / duration) / 1000000;
-                    sRes.innerText = mbps.toFixed(2);
-                    fill.style.width = Math.min((received / (testSizeInBits/8)) * 100, 100) + "%";
+async function measurePing() {
+
+    const samples = [];
+
+    for(let i = 0; i < 3; i++){
+
+        const start = performance.now();
+
+        try{
+
+            await fetch(
+                "https://api.github.com/zen?cache=" + Date.now(),
+                {
+                    cache:"no-store"
                 }
+            );
+
+            const ping = performance.now() - start;
+
+            samples.push(ping);
+
+        }catch(e){}
+    }
+
+    if(samples.length){
+
+        const avg =
+            samples.reduce((a,b)=>a+b,0) / samples.length;
+
+        pingResult.innerText = Math.round(avg);
+
+    }else{
+        pingResult.innerText = "ERR";
+    }
+}
+
+async function startSpeedTest(){
+
+    startBtn.disabled = true;
+
+    speedResult.innerText = "0";
+
+    pingResult.innerText = "...";
+
+    loader.style.width = "0%";
+
+    await measurePing();
+
+    try{
+
+        const response = await fetch(
+            TEST_FILE + "?cache=" + Date.now(),
+            {
+                cache:"no-store"
             }
-        } catch (e) {
-            sRes.innerText = "ERR";
-            console.error("ТЕСТ ПРЕРВАН");
+        );
+
+        const reader = response.body.getReader();
+
+        const total =
+            Number(
+                response.headers.get("content-length")
+            ) || 100000000;
+
+        let received = 0;
+
+        const startTime = performance.now();
+
+        while(true){
+
+            const {done, value} =
+                await reader.read();
+
+            if(done) break;
+
+            received += value.length;
+
+            const seconds =
+                (performance.now() - startTime) / 1000;
+
+            if(seconds > 0){
+
+                const mbps =
+                    ((received * 8) / seconds) /
+                    1024 /
+                    1024;
+
+                speedResult.innerText =
+                    mbps.toFixed(2);
+
+                const percent =
+                    (received / total) * 100;
+
+                loader.style.width =
+                    Math.min(percent,100) + "%";
+            }
         }
 
-        runBtn.disabled = false;
-        runBtn.innerText = "Restart";
+    }catch(error){
+
+        console.error(error);
+
+        speedResult.innerText = "ERR";
     }
 
-    runBtn.addEventListener('click', startTest);
+    startBtn.disabled = false;
 
-    // ЗЕЛЕНАЯ ЗМЕЙКА (МАТРИЦА)
-    const canvas = document.getElementById('snakeCanvas');
-    const ctx = canvas.getContext('2d');
-    const tile = 20;
-    let snake = [{x: 10, y: 10}, {x: 9, y: 10}];
-    let foods = [{x: 15, y: 15}];
-    let dx = 1, dy = 0;
+    startBtn.innerHTML =
+        'RESTART<div id="loader" class="loader-bar" style="width:100%"></div>';
+}
 
-    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-    window.addEventListener('resize', resize);
-    resize();
+startBtn.addEventListener("click", startSpeedTest);
 
-    function draw() {
-        const w = Math.floor(canvas.width / tile);
-        const h = Math.floor(canvas.height / tile);
-        ctx.fillStyle = "#010401";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+/* =========================
+   MATRIX SNAKE
+========================= */
 
-        const head = {...snake[0]};
-        let target = foods[0];
-        let minDist = 10000;
-        foods.forEach(f => {
-            let d = Math.abs(head.x - f.x) + Math.abs(head.y - f.y);
-            if(d < minDist) { minDist = d; target = f; }
-        });
+const canvas = document.getElementById("snakeCanvas");
+const ctx = canvas.getContext("2d");
 
-        if (head.x < target.x && dx !== -1) { dx = 1; dy = 0; }
-        else if (head.x > target.x && dx !== 1) { dx = -1; dy = 0; }
-        else if (head.y < target.y && dy !== -1) { dx = 0; dy = 1; }
-        else if (head.y > target.y && dy !== 1) { dx = 0; dy = -1; }
+const tile = 20;
 
-        const next = { x: (head.x + dx + w) % w, y: (head.y + dy + h) % h };
-        snake.unshift(next);
+let snake = [
+    {x:10,y:10},
+    {x:9,y:10}
+];
 
-        let ate = false;
-        foods = foods.filter(f => {
-            if (f.x === next.x && f.y === next.y) { ate = true; return false; }
-            return true;
-        });
+let foods = [
+    {x:15,y:15}
+];
 
-        if (ate) {
-            for(let i=0; i<2; i++) foods.push({ x: Math.floor(Math.random() * w), y: Math.floor(Math.random() * h) });
-        } else {
-            snake.pop();
+let dx = 1;
+let dy = 0;
+
+function resize(){
+
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+}
+
+addEventListener("resize", resize);
+
+resize();
+
+function updateSnake(){
+
+    const w = Math.floor(canvas.width / tile);
+    const h = Math.floor(canvas.height / tile);
+
+    const head = {...snake[0]};
+
+    let target = foods[0];
+    let min = Infinity;
+
+    for(const food of foods){
+
+        const dist =
+            Math.abs(food.x - head.x) +
+            Math.abs(food.y - head.y);
+
+        if(dist < min){
+
+            min = dist;
+            target = food;
+        }
+    }
+
+    if(head.x < target.x && dx !== -1){
+
+        dx = 1;
+        dy = 0;
+    }
+    else if(head.x > target.x && dx !== 1){
+
+        dx = -1;
+        dy = 0;
+    }
+    else if(head.y < target.y && dy !== -1){
+
+        dx = 0;
+        dy = 1;
+    }
+    else if(head.y > target.y && dy !== 1){
+
+        dx = 0;
+        dy = -1;
+    }
+
+    const next = {
+        x:(head.x + dx + w) % w,
+        y:(head.y + dy + h) % h
+    };
+
+    snake.unshift(next);
+
+    let ate = false;
+
+    foods = foods.filter(food=>{
+
+        if(food.x === next.x && food.y === next.y){
+
+            ate = true;
+            return false;
         }
 
-        ctx.fillStyle = "#ff003c";
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#ff003c";
-        foods.forEach(f => ctx.fillRect(f.x * tile + 4, f.y * tile + 4, tile - 8, tile - 8));
+        return true;
+    });
 
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = "#00ff41";
-        snake.forEach((p, i) => {
-            ctx.fillStyle = i === 0 ? "#00ff41" : "#003b00";
-            ctx.fillRect(p.x * tile + 1, p.y * tile + 1, tile - 2, tile - 2);
-        });
-        ctx.shadowBlur = 0;
+    if(ate){
+
+        for(let i=0;i<2;i++){
+
+            foods.push({
+                x:Math.floor(Math.random()*w),
+                y:Math.floor(Math.random()*h)
+            });
+        }
+
+    }else{
+
+        snake.pop();
     }
-    setInterval(draw, 70);
+}
+
+function draw(){
+
+    ctx.fillStyle = "#010401";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = "#ff003c";
+
+    ctx.fillStyle = "#ff003c";
+
+    for(const food of foods){
+
+        ctx.fillRect(
+            food.x * tile + 4,
+            food.y * tile + 4,
+            tile - 8,
+            tile - 8
+        );
+    }
+
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = "#00ff41";
+
+    snake.forEach((part,index)=>{
+
+        ctx.fillStyle =
+            index === 0
+            ? "#00ff41"
+            : "#003b00";
+
+        ctx.fillRect(
+            part.x * tile + 1,
+            part.y * tile + 1,
+            tile - 2,
+            tile - 2
+        );
+    });
+
+    ctx.shadowBlur = 0;
+}
+
+let last = 0;
+
+function loop(timestamp){
+
+    if(timestamp - last > 70){
+
+        updateSnake();
+
+        draw();
+
+        last = timestamp;
+    }
+
+    requestAnimationFrame(loop);
+}
+
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
