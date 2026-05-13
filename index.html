@@ -44,6 +44,10 @@ body{
     z-index:1;
 }
 
+/* =========================
+   UI
+========================= */
+
 .panel{
     position:relative;
     z-index:10;
@@ -54,15 +58,15 @@ body{
 
     border-radius:35px;
 
-    background:rgba(5,12,5,.94);
-
-    border:1px solid rgba(0,255,65,.15);
+    background:rgba(5,12,5,.95);
 
     backdrop-filter:blur(20px);
 
+    border:1px solid rgba(0,255,65,.15);
+
     box-shadow:
         0 0 80px rgba(0,255,65,.08),
-        inset 0 0 25px rgba(0,255,65,.04);
+        inset 0 0 25px rgba(0,255,65,.03);
 }
 
 .title{
@@ -148,7 +152,7 @@ button:hover:not(:disabled){
 }
 
 button:disabled{
-    opacity:.6;
+    opacity:.5;
 }
 
 .loader{
@@ -157,8 +161,8 @@ button:disabled{
     left:0;
     bottom:0;
 
-    height:4px;
     width:0%;
+    height:4px;
 
     background:var(--accent);
 
@@ -202,41 +206,58 @@ button:disabled{
    ELEMENTS
 ========================= */
 
-const startBtn =
-    document.getElementById("startBtn");
-
 const pingEl =
     document.getElementById("ping");
 
 const speedEl =
     document.getElementById("speed");
 
+const startBtn =
+    document.getElementById("startBtn");
+
 const loader =
     document.getElementById("loader");
 
 /* =========================
-   SMART TEST
+   SETTINGS
 ========================= */
 
 /*
-    УМНЫЙ ТЕСТ:
-
-    1. Маленький файл для слабого интернета
-    2. Автоостановка через 8 секунд
-    3. НЕ качает 100MB
-    4. Нормально работает в РФ
+    Маленький файл.
+    Нормально работает даже
+    при слабом интернете.
 */
 
 const TEST_URL =
     "https://cachefly.cachefly.net/20mb.test";
 
+/*
+    Общая длина теста
+*/
+
+const TEST_DURATION = 10000;
+
+/*
+    Прогрев.
+    Игнорируем первые секунды.
+*/
+
+const WARMUP_TIME = 2000;
+
+/*
+    Сглаживание.
+    Убирает фейковые пики.
+*/
+
+const STABILIZER = 0.65;
+
 /* =========================
-   PING
+   PING TEST
 ========================= */
 
 async function pingTest(){
 
-    const results = [];
+    const values = [];
 
     for(let i = 0; i < 3; i++){
 
@@ -258,7 +279,7 @@ async function pingTest(){
             const ping =
                 performance.now() - start;
 
-            results.push(ping);
+            values.push(ping);
 
         }catch(e){
 
@@ -266,15 +287,15 @@ async function pingTest(){
         }
     }
 
-    if(results.length === 0){
+    if(values.length === 0){
 
         pingEl.innerText = "--";
         return;
     }
 
     const avg =
-        results.reduce((a,b)=>a+b,0)
-        / results.length;
+        values.reduce((a,b)=>a+b,0)
+        / values.length;
 
     pingEl.innerText =
         Math.round(avg);
@@ -306,8 +327,6 @@ async function speedTest(){
         const startTime =
             performance.now();
 
-        const TEST_DURATION = 8000;
-
         while(true){
 
             const {done, value} =
@@ -320,35 +339,72 @@ async function speedTest(){
             const elapsed =
                 performance.now() - startTime;
 
-            const seconds =
-                elapsed / 1000;
+            /*
+                Прогрев
+            */
+
+            if(elapsed < WARMUP_TIME){
+
+                loader.style.width =
+                    (
+                        elapsed /
+                        TEST_DURATION
+                    ) * 100 + "%";
+
+                continue;
+            }
+
+            /*
+                Настоящее время теста
+            */
+
+            const realSeconds =
+                (elapsed - WARMUP_TIME)
+                / 1000;
 
             /*
                 Mbps
             */
 
-            const speed =
+            let speed =
                 (
                     (received * 8)
-                    / seconds
+                    / realSeconds
                 )
                 / 1024
                 / 1024;
 
+            /*
+                Стабилизация
+            */
+
+            speed *= STABILIZER;
+
+            /*
+                Ограничение скачков
+            */
+
+            speed =
+                Math.max(
+                    0,
+                    Math.min(speed,999)
+                );
+
+            /*
+                UI
+            */
+
             speedEl.innerText =
                 speed.toFixed(2);
 
-            /*
-                Прогресс по времени
-            */
-
-            const progress =
-                (elapsed / TEST_DURATION)
-                * 100;
-
             loader.style.width =
-                Math.min(progress,100)
-                + "%";
+                Math.min(
+                    (
+                        elapsed /
+                        TEST_DURATION
+                    ) * 100,
+                    100
+                ) + "%";
 
             /*
                 Автостоп
@@ -369,18 +425,18 @@ async function speedTest(){
 }
 
 /* =========================
-   START
+   START TEST
 ========================= */
 
 async function runTest(){
 
     startBtn.disabled = true;
 
-    loader.style.width = "0%";
-
     pingEl.innerText = "...";
 
     speedEl.innerText = "0";
+
+    loader.style.width = "0%";
 
     await pingTest();
 
@@ -448,7 +504,7 @@ function updateSnake(){
     let target =
         foods[0];
 
-    let min =
+    let minDist =
         Infinity;
 
     for(const food of foods){
@@ -458,9 +514,9 @@ function updateSnake(){
             +
             Math.abs(head.y - food.y);
 
-        if(dist < min){
+        if(dist < minDist){
 
-            min = dist;
+            minDist = dist;
             target = food;
         }
     }
@@ -588,10 +644,14 @@ function animate(time){
         last = time;
     }
 
-    requestAnimationFrame(animate);
+    requestAnimationFrame(
+        animate
+    );
 }
 
-requestAnimationFrame(animate);
+requestAnimationFrame(
+    animate
+);
 </script>
 
 </body>
