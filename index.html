@@ -6,20 +6,20 @@
     <title>speedtestBOGDAN</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap');
-        :root { --bg: #020205; --accent: #00f2ff; --glass: rgba(5, 5, 12, 0.95); --text: #ffffff; }
+        :root { --bg: #020205; --accent: #00ff41; --glass: rgba(5, 12, 5, 0.95); --text: #ffffff; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: 'JetBrains Mono', monospace; background: var(--bg); color: var(--text); display: flex; justify-content: center; align-items: center; overflow: hidden; }
-        #snakeCanvas { position: fixed; top: 0; left: 0; z-index: 1; background: #010103; }
-        .main-interface { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 40px; padding: 40px; width: 320px; text-align: center; box-shadow: 0 0 100px rgba(0, 0, 0, 0.9); }
-        h1 { font-size: 1.1rem; letter-spacing: 5px; margin-bottom: 30px; color: var(--accent); text-transform: uppercase; }
-        .data-card { background: rgba(0, 0, 0, 0.6); border-radius: 20px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #7000ff; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .data-card.active { border-left-color: var(--accent); transform: scale(1.02); }
-        .label { font-size: 0.6rem; color: #555; text-transform: uppercase; margin-bottom: 5px; display: block; }
+        #snakeCanvas { position: fixed; top: 0; left: 0; z-index: 1; background: #010401; }
+        .main-interface { position: relative; z-index: 10; background: var(--glass); backdrop-filter: blur(20px); border: 1px solid rgba(0, 255, 65, 0.2); border-radius: 40px; padding: 40px; width: 320px; text-align: center; box-shadow: 0 0 100px rgba(0, 255, 65, 0.1); }
+        h1 { font-size: 1.1rem; letter-spacing: 5px; margin-bottom: 30px; color: var(--accent); text-transform: uppercase; text-shadow: 0 0 10px var(--accent); }
+        .data-card { background: rgba(0, 0, 0, 0.7); border-radius: 20px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #008f11; transition: 0.3s; }
+        .data-card.active { border-left-color: var(--accent); transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 255, 65, 0.1); }
+        .label { font-size: 0.6rem; color: #008f11; text-transform: uppercase; margin-bottom: 5px; display: block; }
         .num { font-size: 2.5rem; font-weight: 800; color: #fff; line-height: 1; }
         .unit { color: var(--accent); font-size: 0.8rem; margin-left: 5px; }
         .btn-start { width: 100%; padding: 18px; border-radius: 12px; background: transparent; border: 2px solid var(--accent); color: var(--accent); font-family: inherit; font-weight: 800; cursor: pointer; transition: 0.3s; text-transform: uppercase; position: relative; overflow: hidden; }
         .btn-start:hover:not(:disabled) { background: var(--accent); color: #000; box-shadow: 0 0 30px var(--accent); }
-        .btn-start:disabled { opacity: 0.2; }
-        .loader-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width 0.2s; }
+        .btn-start:disabled { opacity: 0.3; }
+        .loader-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--accent); transition: width 0.3s; }
     </style>
 </head>
 <body>
@@ -28,8 +28,8 @@
 
 <div class="main-interface">
     <h1>speedtestBOGDAN</h1>
-    <div id="pCard" class="data-card"><span class="label">Latency</span><span id="pRes" class="num">0</span><span class="unit">ms</span></div>
-    <div id="sCard" class="data-card"><span class="label">Bandwidth</span><span id="sRes" class="num">0</span><span id="sUnit" class="unit">Mbps</span></div>
+    <div id="pCard" class="data-card"><span class="label">Ping</span><span id="pRes" class="num">0</span><span class="unit">ms</span></div>
+    <div id="sCard" class="data-card"><span class="label">Download</span><span id="sRes" class="num">0</span><span id="sUnit" class="unit">Mbps</span></div>
     <button id="run" class="btn-start">Execute<div id="fill" class="loader-bar" style="width: 0%"></div></button>
 </div>
 
@@ -39,49 +39,51 @@
     const pRes = document.getElementById('pRes');
     const fill = document.getElementById('fill');
 
-    // Оптимальный размер чанка для точности
-    const testUrl = "https://speed.cloudflare.com/__down?bytes=15000000"; 
+    // ИСПОЛЬЗУЕМ БОЛЕЕ СТАБИЛЬНЫЙ РАЗМЕР ДЛЯ ТЕСТА БЕЗ VPN
+    const testUrl = "https://speed.cloudflare.com/__down?bytes=25000000"; 
 
     async function startTest() {
         runBtn.disabled = true;
         fill.style.width = "0%";
+        sRes.innerText = "0";
         
-        // 1. Улучшенный Пинг
+        // PING
         document.getElementById('pCard').classList.add('active');
         try {
-            const startPing = performance.now();
-            await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
-            pRes.innerText = (performance.now() - startPing).toFixed(0);
-        } catch { pRes.innerText = "ERR"; }
+            const results = [];
+            for(let i=0; i<3; i++) {
+                const start = performance.now();
+                await fetch(window.location.href, { method: 'HEAD', cache: 'no-store' });
+                results.push(performance.now() - start);
+            }
+            pRes.innerText = Math.min(...results).toFixed(0);
+        } catch { pRes.innerText = "--"; }
         document.getElementById('pCard').classList.remove('active');
 
-        // 2. Скорость через Stream (High Accuracy)
+        // SPEED TEST
         document.getElementById('sCard').classList.add('active');
         try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 сек лимит
-
-            const response = await fetch(testUrl + "&cb=" + Date.now(), { signal: controller.signal });
+            const response = await fetch(testUrl + "&cb=" + Date.now());
             const reader = response.body.getReader();
             const startTime = performance.now();
             let received = 0;
-            const totalGoal = 15000000 * 8; // в биты
 
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
-                received += (value.length * 8);
+                received += value.length;
                 const duration = (performance.now() - startTime) / 1000;
-                const bps = received / duration;
-                const mbps = bps / (1024 * 1024);
                 
-                sRes.innerText = mbps.toFixed(mbps > 10 ? 1 : 2);
-                fill.style.width = (Math.min((received / totalGoal) * 100, 100)) + "%";
+                if (duration > 0.1) {
+                    // ПЕРЕВОД В МЕГАБИТЫ (bits / duration / 10^6)
+                    const mbps = (received * 8 / duration) / 1000000;
+                    sRes.innerText = mbps.toFixed(1);
+                    fill.style.width = Math.min((received / 25000000) * 100, 100) + "%";
+                }
             }
-            clearTimeout(timeoutId);
         } catch (e) {
-            sRes.innerText = "!";
-            console.log("Test interrupted or blocked.");
+            sRes.innerText = "ERR";
+            console.error("ОШИБКА СЕТИ. ВОЗМОЖНО, НУЖЕН VPN ДЛЯ CLOUDFLARE.");
         }
 
         document.getElementById('sCard').classList.remove('active');
@@ -91,12 +93,12 @@
 
     runBtn.addEventListener('click', startTest);
 
-    // --- ЗМЕЙКА С РАЗМНОЖЕНИЕМ ЕДЫ ---
+    // ЗЕЛЕНАЯ ЗМЕЙКА С БЕСКОНЕЧНОЙ ЕДОЙ
     const canvas = document.getElementById('snakeCanvas');
     const ctx = canvas.getContext('2d');
-    const tile = 20;
-    let snake = [{x: 10, y: 10}];
-    let foods = [{x: 15, y: 15}]; // Массив еды
+    const tile = 22;
+    let snake = [{x: 10, y: 10}, {x: 9, y: 10}];
+    let foods = [{x: 15, y: 15}];
     let dx = 1, dy = 0;
 
     function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -107,20 +109,19 @@
         const w = Math.floor(canvas.width / tile);
         const h = Math.floor(canvas.height / tile);
         
-        ctx.fillStyle = "#010103";
+        ctx.fillStyle = "#010401";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         const head = {...snake[0]};
         
-        // AI: Ищем ближайшее яблоко
+        // AI: ПОИСК БЛИЖАЙШЕЙ ЦЕЛИ
         let target = foods[0];
-        let minDist = Infinity;
+        let minDist = 10000;
         foods.forEach(f => {
             let d = Math.abs(head.x - f.x) + Math.abs(head.y - f.y);
             if(d < minDist) { minDist = d; target = f; }
         });
 
-        // Простая логика движения к цели
         if (head.x < target.x && dx !== -1) { dx = 1; dy = 0; }
         else if (head.x > target.x && dx !== 1) { dx = -1; dy = 0; }
         else if (head.y < target.y && dy !== -1) { dx = 0; dy = 1; }
@@ -129,43 +130,36 @@
         const next = { x: (head.x + dx + w) % w, y: (head.y + dy + h) % h };
         snake.unshift(next);
 
-        // Проверка поедания
         let ate = false;
         foods = foods.filter(f => {
-            if (f.x === next.x && f.y === next.y) {
-                ate = true;
-                return false; 
-            }
+            if (f.x === next.x && f.y === next.y) { ate = true; return false; }
             return true;
         });
 
         if (ate) {
-            // Добавляем ДВА новых яблока вместо одного съеденного
-            for(let i=0; i<2; i++) {
-                foods.push({ x: Math.floor(Math.random() * w), y: Math.floor(Math.random() * h) });
-            }
+            // ПЛОДИМ ЕДУ
+            for(let i=0; i<2; i++) foods.push({ x: Math.floor(Math.random() * w), y: Math.floor(Math.random() * h) });
         } else {
             snake.pop();
         }
 
-        // Рисуем еду
-        ctx.fillStyle = "#ff0044";
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#ff0044";
-        foods.forEach(f => ctx.fillRect(f.x * tile + 2, f.y * tile + 2, tile - 4, tile - 4));
+        // РИСУЕМ ЕДУ (КРАСНЫЙ ПУЛЬС)
+        ctx.fillStyle = "#ff003c";
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#ff003c";
+        foods.forEach(f => ctx.fillRect(f.x * tile + 4, f.y * tile + 4, tile - 8, tile - 8));
 
-        // Рисуем змейку
-        ctx.shadowColor = "#00f2ff";
+        // РИСУЕМ ЗМЕЮ (ЯДОВИТО-ЗЕЛЕНЫЙ)
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "#00ff41";
         snake.forEach((p, i) => {
-            ctx.fillStyle = i === 0 ? "#00f2ff" : "#004455";
-            ctx.globalAlpha = Math.max(0.2, 1 - (i / 50));
-            ctx.fillRect(p.x * tile, p.y * tile, tile - 1, tile - 1);
+            ctx.fillStyle = i === 0 ? "#00ff41" : "#003b00";
+            ctx.fillRect(p.x * tile + 1, p.y * tile + 1, tile - 2, tile - 2);
         });
-        ctx.globalAlpha = 1;
         ctx.shadowBlur = 0;
     }
 
-    setInterval(draw, 70);
+    setInterval(draw, 60);
 </script>
 </body>
 </html>
