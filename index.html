@@ -10,9 +10,9 @@
         :root {
             --bg: #020205;
             --accent: #00f2ff;
-            --accent-glow: rgba(0, 242, 255, 0.4);
-            --secondary: #bc13fe;
-            --glass: rgba(10, 10, 15, 0.85);
+            --snake-body: #10b981;
+            --apple: #ef4444;
+            --glass: rgba(5, 5, 10, 0.9);
             --text: #ffffff;
         }
 
@@ -28,245 +28,231 @@
             overflow: hidden;
         }
 
-        /* Анимированный кибер-фон */
-        .grid-bg {
+        /* Фоновый канвас для змейки */
+        #snakeBG {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #0a0a1a 0%, #020205 100%);
+            top: 0; left: 0;
             z-index: -1;
-        }
-        .grid-bg::before {
-            content: "";
-            position: absolute;
-            width: 200%; height: 200%;
-            top: -50%; left: -50%;
-            background-image: 
-                linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
-            transform: perspective(500px) rotateX(60deg);
-            animation: gridMove 20s linear infinite;
+            opacity: 0.3; /* Чтобы змейка не отвлекала от цифр */
         }
 
-        @keyframes gridMove {
-            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
-            100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
-        }
-
-        /* Контейнер */
-        .glass-card {
+        .card {
             background: var(--glass);
             backdrop-filter: blur(20px);
-            border: 2px solid rgba(0, 242, 255, 0.15);
+            border: 2px solid rgba(0, 242, 255, 0.1);
             border-radius: 40px;
-            padding: 50px 40px;
+            padding: 50px;
             width: 400px;
             text-align: center;
-            box-shadow: 0 0 80px rgba(0, 0, 0, 0.9), inset 0 0 30px rgba(0, 242, 255, 0.05);
+            box-shadow: 0 0 100px rgba(0, 0, 0, 1);
             position: relative;
-            z-index: 10;
         }
 
         h1 {
-            font-size: 1.6rem;
-            text-transform: uppercase;
+            font-size: 1.5rem;
             letter-spacing: 5px;
-            margin: 0 0 40px 0;
+            margin-bottom: 40px;
             color: var(--accent);
-            text-shadow: 0 0 20px var(--accent-glow);
+            text-transform: uppercase;
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
         }
 
-        .display {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 25px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-bottom: 3px solid var(--secondary);
+        .stat-box {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #7000ff;
             transition: 0.3s;
         }
 
-        .display.active {
-            border-bottom-color: var(--accent);
-            box-shadow: 0 10px 30px -10px var(--accent-glow);
+        .stat-box.active {
+            border-left-color: var(--accent);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.1);
+            transform: scale(1.03);
         }
 
-        .label {
-            font-size: 0.75rem;
-            color: #777;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            display: block;
-        }
+        .label { font-size: 0.7rem; color: #666; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .val { font-size: 3.2rem; font-weight: 800; color: #fff; }
+        .unit { color: var(--accent); font-size: 1rem; margin-left: 6px; }
 
-        .value {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: #fff;
-            line-height: 1;
-        }
-
-        .unit {
-            color: var(--accent);
-            font-size: 1rem;
-            margin-left: 8px;
-            font-weight: 400;
-        }
-
-        /* Кнопка */
-        .btn-main {
+        .go-btn {
             width: 100%;
             padding: 20px;
-            border-radius: 20px;
-            border: 1px solid var(--accent);
+            border-radius: 18px;
             background: transparent;
+            border: 2px solid var(--accent);
             color: var(--accent);
             font-family: 'JetBrains Mono', monospace;
             font-weight: 800;
-            font-size: 1.1rem;
             cursor: pointer;
             transition: 0.4s;
-            text-transform: uppercase;
             letter-spacing: 3px;
+            text-transform: uppercase;
         }
 
-        .btn-main:hover:not(:disabled) {
+        .go-btn:hover:not(:disabled) {
             background: var(--accent);
             color: #000;
-            box-shadow: 0 0 40px var(--accent-glow);
+            box-shadow: 0 0 30px var(--accent);
         }
 
-        .btn-main:disabled {
-            opacity: 0.3;
-            filter: grayscale(1);
-        }
+        .go-btn:disabled { opacity: 0.3; }
 
-        .status-msg {
-            margin-top: 25px;
-            font-size: 0.8rem;
-            color: #555;
-            min-height: 1.2rem;
-        }
-
-        /* Змейка 2.0 */
-        .snake-wrap {
+        /* Бегущая полоса (загрузка) */
+        .loader-bar {
             position: absolute;
-            bottom: 0; left: 0; width: 100%; height: 8px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 0 0 40px 40px;
-            overflow: hidden;
+            bottom: 0; left: 0; width: 100%; height: 5px;
+            background: rgba(255,255,255,0.05);
             display: none;
+            overflow: hidden;
+            border-radius: 0 0 40px 40px;
         }
-
-        .snake-core {
+        .loader-line {
             position: absolute;
-            height: 100%;
-            width: 120px;
-            background: linear-gradient(90deg, transparent, var(--accent), #fff, var(--accent), transparent);
-            filter: drop-shadow(0 0 8px var(--accent));
-            animation: snakeMove 1s infinite cubic-bezier(0.4, 0, 0.6, 1);
+            height: 100%; width: 30%;
+            background: var(--accent);
+            animation: slide 1s infinite linear;
         }
-
-        @keyframes snakeMove {
-            0% { left: -150px; }
-            100% { left: 100%; }
-        }
+        @keyframes slide { from { left: -40%; } to { left: 110%; } }
     </style>
 </head>
 <body>
 
-<div class="grid-bg"></div>
+<!-- Фоновая игра -->
+<canvas id="snakeBG"></canvas>
 
-<div class="glass-card">
+<div class="card">
     <h1>speedtestBOGDAN</h1>
     
-    <div id="ping-box" class="display">
-        <span class="label">Задержка сети</span>
-        <span id="pingVal" class="value">0</span><span class="unit">ms</span>
+    <div id="pingBox" class="stat-box">
+        <span class="label">Response</span>
+        <span id="pVal" class="val">0</span><span class="unit">ms</span>
     </div>
 
-    <div id="speed-box" class="display">
-        <span class="label">Битрейт потока</span>
-        <span id="speedVal" class="value">0</span><span class="unit">Kbps</span>
+    <div id="speedBox" class="stat-box">
+        <span class="label">Transfer Rate</span>
+        <span id="sVal" class="val">0</span><span id="sUnit" class="unit">Kbps</span>
     </div>
 
-    <button id="mainBtn" class="btn-main">Запуск Системы</button>
-    
-    <div id="status" class="status-msg">Мониторинг готов</div>
+    <button id="startBtn" class="go-btn">Start Test</button>
 
-    <div id="snake" class="snake-wrap"><div class="snake-core"></div></div>
+    <div id="loader" class="loader-bar"><div class="loader-line"></div></div>
 </div>
 
 <script>
-    const btn = document.getElementById('mainBtn');
-    const pVal = document.getElementById('pingVal');
-    const sVal = document.getElementById('speedVal');
-    const status = document.getElementById('status');
-    const snake = document.getElementById('snake');
-    const sBox = document.getElementById('speed-box');
-    const pBox = document.getElementById('ping-box');
+    // --- ЛОГИКА ТЕСТА СКОРОСТИ ---
+    const startBtn = document.getElementById('startBtn');
+    const sVal = document.getElementById('sVal');
+    const sUnit = document.getElementById('sUnit');
+    const pVal = document.getElementById('pVal');
+    const loader = document.getElementById('loader');
 
-    // Оптимизированный файл для замера на слабых скоростях (~2.5 MB)
-    const dataUrl = "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?q=70&w=2500&auto=format&fit=crop";
+    const testFile = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=60&w=2500&auto=format&fit=crop";
 
     async function runTest() {
-        btn.disabled = true;
-        snake.style.display = 'block';
-        status.innerText = "Синхронизация узлов...";
-        pBox.classList.add('active');
-
-        // 1. Точный Ping
-        let pings = [];
-        for(let i=0; i<4; i++) {
-            const start = performance.now();
-            try {
-                await fetch(window.location.href + "?v=" + Math.random(), { mode: 'no-cors', cache: 'no-store' });
-                pings.push(performance.now() - start);
-            } catch(e) {}
-            await new Promise(r => setTimeout(r, 150));
-        }
-        pVal.innerText = pings.length ? Math.min(...pings).toFixed(0) : "ERR";
-        pBox.classList.remove('active');
-
-        // 2. Тест скорости (Kbps)
-        status.innerText = "Захват данных пакетов...";
-        sBox.classList.add('active');
+        startBtn.disabled = true;
+        loader.style.display = 'block';
         
+        // Ping
+        document.getElementById('pingBox').classList.add('active');
+        let pings = [];
+        for(let i=0; i<3; i++) {
+            const t0 = performance.now();
+            await fetch(window.location.href + "?p=" + Math.random(), { mode: 'no-cors' });
+            pings.push(performance.now() - t0);
+        }
+        pVal.innerText = Math.min(...pings).toFixed(0);
+        document.getElementById('pingBox').classList.remove('active');
+
+        // Speed
+        document.getElementById('speedBox').classList.add('active');
         const startTime = performance.now();
         try {
-            const response = await fetch(dataUrl + "&cache=" + startTime, { cache: 'no-store' });
-            const reader = response.body.getReader();
-            let totalBits = 0;
+            const res = await fetch(testFile + "&cb=" + startTime, { cache: 'no-store' });
+            const reader = res.body.getReader();
+            let loaded = 0;
 
             while(true) {
                 const {done, value} = await reader.read();
                 if (done) break;
-                totalBits += (value.length * 8); // Переводим байты в биты
+                loaded += (value.length * 8);
+                const time = (performance.now() - startTime) / 1000;
                 
-                const timeElapsed = (performance.now() - startTime) / 1000;
-                if (timeElapsed > 0.2) {
-                    // Рассчитываем Кбит/с (через 1024)
-                    const kbps = Math.floor(totalBits / timeElapsed / 1024);
-                    sVal.innerText = kbps.toLocaleString('ru-RU'); // Добавляем разделение тысяч для красоты
+                if (time > 0.1) {
+                    const kbps = loaded / time / 1024;
+                    // Умное переключение единиц
+                    if (kbps >= 1024) {
+                        sVal.innerText = (kbps / 1024).toFixed(2);
+                        sUnit.innerText = "Mbps";
+                    } else {
+                        sVal.innerText = Math.floor(kbps);
+                        sUnit.innerText = "Kbps";
+                    }
                 }
             }
+        } catch(e) {}
 
-            const finalTime = (performance.now() - startTime) / 1000;
-            const finalKbps = Math.floor(totalBits / finalTime / 1024);
-            sVal.innerText = finalKbps.toLocaleString('ru-RU');
-            status.innerText = "Диагностика завершена.";
-
-        } catch (err) {
-            status.innerText = "Сбой: Превышено время ожидания.";
-        }
-
-        sBox.classList.remove('active');
-        snake.style.display = 'none';
-        btn.disabled = false;
-        btn.innerText = "ПОВТОРИТЬ";
+        document.getElementById('speedBox').classList.remove('active');
+        loader.style.display = 'none';
+        startBtn.disabled = false;
+        startBtn.innerText = "Retry";
     }
 
-    btn.addEventListener('click', runTest);
+    startBtn.addEventListener('click', runTest);
+
+    // --- ЛОГИКА ФОНОВОЙ ЗМЕЙКИ (АВТО-ИГРА) ---
+    const canvas = document.getElementById('snakeBG');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    const gridSize = 20;
+    let snake = [{x: 10, y: 10}];
+    let apple = {x: 15, y: 15};
+    let dx = 1, dy = 0;
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const cols = Math.floor(canvas.width / gridSize);
+        const rows = Math.floor(canvas.height / gridSize);
+
+        // ИИ для змейки (ищет яблоко)
+        const head = snake[0];
+        if (head.x < apple.x) { dx = 1; dy = 0; }
+        else if (head.x > apple.x) { dx = -1; dy = 0; }
+        else if (head.y < apple.y) { dx = 0; dy = 1; }
+        else if (head.y > apple.y) { dx = 0; dy = -1; }
+
+        const newHead = { x: (head.x + dx + cols) % cols, y: (head.y + dy + rows) % rows };
+        snake.unshift(newHead);
+
+        if (newHead.x === apple.x && newHead.y === apple.y) {
+            apple = { x: Math.floor(Math.random() * cols), y: Math.floor(Math.random() * rows) };
+        } else {
+            snake.pop();
+        }
+
+        // Рисуем яблоко
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(apple.x * gridSize, apple.y * gridSize, gridSize - 2, gridSize - 2);
+
+        // Рисуем змейку
+        ctx.fillStyle = '#10b981';
+        snake.forEach((part, i) => {
+            ctx.globalAlpha = 1 - (i / snake.length * 0.8); // Хвост бледнее
+            ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize - 2, gridSize - 2);
+        });
+        ctx.globalAlpha = 1;
+    }
+
+    setInterval(draw, 80); // Скорость игры
 </script>
 
 </body>
