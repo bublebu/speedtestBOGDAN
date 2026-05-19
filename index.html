@@ -1,18 +1,25 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>speedtestBOGDAN</title>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;800&display=swap');
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 
+<style>
 :root{
-    --bg:#020205;
-    --accent:#00ff41;
-    --red:#ff003c;
+    --bg:#020308;
+    --panel:#08110d;
+    --card:#0b1611;
+    --accent:#00ff7b;
+    --accent2:#00c853;
+    --red:#ff1744;
+    --text:#ecfff2;
+    --muted:#6bd48e;
 }
 
 *{
@@ -26,9 +33,9 @@ body{
     width:100%;
     height:100%;
     overflow:hidden;
-    background:var(--bg);
-    color:white;
+    background:radial-gradient(circle at top,#07150e 0%,#020308 55%);
     font-family:'JetBrains Mono', monospace;
+    color:var(--text);
 }
 
 body{
@@ -37,84 +44,188 @@ body{
     align-items:center;
 }
 
-#snakeCanvas{
+#bg{
     position:fixed;
     inset:0;
-    background:#010401;
     z-index:1;
 }
 
-/* =========================
-   UI
-========================= */
-
 .panel{
     position:relative;
-    z-index:10;
+    z-index:5;
 
-    width:320px;
+    width:370px;
 
-    padding:35px;
+    padding:30px;
 
-    border-radius:35px;
+    border-radius:30px;
 
-    background:rgba(5,12,5,.95);
+    background:rgba(8,15,11,.82);
 
-    backdrop-filter:blur(20px);
+    border:1px solid rgba(0,255,123,.18);
 
-    border:1px solid rgba(0,255,65,.15);
+    backdrop-filter:blur(18px);
 
     box-shadow:
-        0 0 80px rgba(0,255,65,.08),
-        inset 0 0 25px rgba(0,255,65,.03);
+        0 0 60px rgba(0,255,123,.08),
+        inset 0 0 20px rgba(0,255,123,.04);
 }
 
-.title{
+.panel::before{
+    content:"";
+
+    position:absolute;
+    inset:0;
+
+    border-radius:30px;
+
+    padding:1px;
+
+    background:linear-gradient(
+        140deg,
+        rgba(0,255,123,.4),
+        transparent,
+        rgba(0,255,123,.2)
+    );
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+    -webkit-mask-composite:xor;
+
+    pointer-events:none;
+}
+
+.logo{
     text-align:center;
+    margin-bottom:30px;
+}
 
+.logo h1{
+    font-size:1rem;
+    letter-spacing:6px;
     color:var(--accent);
+    text-shadow:0 0 18px rgba(0,255,123,.7);
+}
 
-    font-size:.9rem;
+.logo p{
+    margin-top:8px;
+    color:#61c98c;
+    font-size:.62rem;
+    letter-spacing:2px;
+}
 
-    letter-spacing:5px;
-
-    margin-bottom:25px;
-
-    text-shadow:0 0 10px var(--accent);
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:14px;
 }
 
 .card{
-    background:rgba(0,0,0,.65);
+    position:relative;
 
-    border-left:4px solid #008f11;
+    overflow:hidden;
 
-    border-radius:20px;
+    background:linear-gradient(
+        180deg,
+        rgba(14,25,18,.92),
+        rgba(8,15,11,.9)
+    );
+
+    border:1px solid rgba(0,255,123,.08);
+
+    border-radius:22px;
 
     padding:18px;
 
-    margin-bottom:14px;
+    min-height:125px;
+
+    box-shadow:
+        inset 0 0 20px rgba(0,255,123,.03);
+}
+
+.card::after{
+    content:"";
+
+    position:absolute;
+    top:0;
+    left:-100%;
+
+    width:100%;
+    height:100%;
+
+    background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,.05),
+        transparent
+    );
+
+    animation:shine 5s linear infinite;
+}
+
+@keyframes shine{
+    100%{
+        left:120%;
+    }
 }
 
 .label{
     display:block;
 
-    margin-bottom:8px;
+    color:var(--muted);
 
-    color:#00a52a;
-
-    font-size:.55rem;
+    font-size:.62rem;
 
     letter-spacing:2px;
+
+    margin-bottom:18px;
 }
 
 .value{
-    font-size:2.2rem;
+    font-size:2.4rem;
     font-weight:800;
 }
 
 .unit{
     color:var(--accent);
-    font-size:.75rem;
+    font-size:.78rem;
+}
+
+.bigCard{
+    margin-bottom:18px;
+
+    background:linear-gradient(
+        180deg,
+        rgba(16,32,22,.95),
+        rgba(8,15,11,.95)
+    );
+
+    border-radius:24px;
+
+    padding:24px;
+
+    border:1px solid rgba(0,255,123,.08);
+}
+
+.speedMain{
+    display:flex;
+    align-items:flex-end;
+    gap:10px;
+}
+
+#speed{
+    font-size:4rem;
+    line-height:1;
+}
+
+.status{
+    margin-top:14px;
+    color:#79d89c;
+    font-size:.7rem;
+    letter-spacing:1px;
 }
 
 button{
@@ -122,37 +233,48 @@ button{
 
     width:100%;
 
-    padding:17px;
-
     border:none;
 
-    border-radius:14px;
+    border-radius:18px;
 
-    background:transparent;
+    padding:18px;
 
-    border:2px solid var(--accent);
+    background:linear-gradient(
+        90deg,
+        var(--accent2),
+        var(--accent)
+    );
 
-    color:var(--accent);
+    color:black;
 
     font-family:inherit;
 
     font-weight:800;
 
+    font-size:.9rem;
+
+    letter-spacing:2px;
+
     cursor:pointer;
+
+    transition:.25s;
 
     overflow:hidden;
 
-    transition:.25s;
+    box-shadow:
+        0 0 30px rgba(0,255,123,.25);
 }
 
 button:hover:not(:disabled){
-    background:var(--accent);
-    color:black;
-    box-shadow:0 0 30px var(--accent);
+    transform:translateY(-2px) scale(1.01);
+
+    box-shadow:
+        0 0 40px rgba(0,255,123,.45);
 }
 
 button:disabled{
-    opacity:.5;
+    opacity:.7;
+    cursor:wait;
 }
 
 .loader{
@@ -161,135 +283,152 @@ button:disabled{
     left:0;
     bottom:0;
 
-    width:0%;
     height:4px;
+    width:0%;
 
-    background:var(--accent);
+    background:black;
 
     transition:width .15s linear;
+}
+
+.footer{
+    margin-top:14px;
+
+    text-align:center;
+
+    font-size:.55rem;
+
+    color:#5f8d6d;
+
+    letter-spacing:1px;
+}
+
+@media(max-width:480px){
+
+    .panel{
+        width:92%;
+        padding:22px;
+    }
+
+    #speed{
+        font-size:3.2rem;
+    }
+
+    .value{
+        font-size:2rem;
+    }
 }
 </style>
 </head>
 <body>
 
-<canvas id="snakeCanvas"></canvas>
+<canvas id="bg"></canvas>
 
 <div class="panel">
 
-    <div class="title">
-        speedtestBOGDAN
+    <div class="logo">
+        <h1>SPEEDTEST</h1>
+        <p>BOGDAN NETWORK ANALYZER</p>
     </div>
 
-    <div class="card">
-        <span class="label">PING</span>
+    <div class="grid">
 
-        <span id="ping" class="value">0</span>
-        <span class="unit">ms</span>
+        <div class="card">
+            <span class="label">PING</span>
+
+            <span id="ping" class="value">0</span>
+            <span class="unit">ms</span>
+        </div>
+
+        <div class="card">
+            <span class="label">JITTER</span>
+
+            <span id="jitter" class="value">0</span>
+            <span class="unit">ms</span>
+        </div>
+
     </div>
 
-    <div class="card">
-        <span class="label">DOWNLOAD</span>
+    <div class="bigCard">
 
-        <span id="speed" class="value">0</span>
-        <span class="unit">Mbps</span>
+        <span class="label">DOWNLOAD SPEED</span>
+
+        <div class="speedMain">
+            <span id="speed" class="value">0</span>
+            <span class="unit">Mbps</span>
+        </div>
+
+        <div id="status" class="status">
+            READY FOR TEST
+        </div>
+
     </div>
 
     <button id="startBtn">
-        EXECUTE
+        START TEST
         <div id="loader" class="loader"></div>
     </button>
+
+    <div class="footer">
+        REALTIME NETWORK MEASUREMENT
+    </div>
 
 </div>
 
 <script>
-/* =========================
-   ELEMENTS
-========================= */
-
-const pingEl =
-    document.getElementById("ping");
-
-const speedEl =
-    document.getElementById("speed");
-
-const startBtn =
-    document.getElementById("startBtn");
-
-const loader =
-    document.getElementById("loader");
-
-/* =========================
-   SETTINGS
-========================= */
+const pingEl = document.getElementById("ping");
+const jitterEl = document.getElementById("jitter");
+const speedEl = document.getElementById("speed");
+const startBtn = document.getElementById("startBtn");
+const loader = document.getElementById("loader");
+const statusEl = document.getElementById("status");
 
 /*
-    Маленький файл.
-    Нормально работает даже
-    при слабом интернете.
+    Стабильный файл.
+    Не слишком маленький и не огромный.
 */
 
 const TEST_URL =
-    "https://cachefly.cachefly.net/20mb.test";
+    "https://speed.cloudflare.com/__down?bytes=50000000";
 
-/*
-    Общая длина теста
-*/
-
-const TEST_DURATION = 10000;
-
-/*
-    Прогрев.
-    Игнорируем первые секунды.
-*/
-
-const WARMUP_TIME = 2000;
-
-/*
-    Сглаживание.
-    Убирает фейковые пики.
-*/
-
-const STABILIZER = 0.65;
+const TEST_DURATION = 12000;
+const WARMUP = 1500;
 
 /* =========================
-   PING TEST
+   PING + JITTER
 ========================= */
 
 async function pingTest(){
 
     const values = [];
 
-    for(let i = 0; i < 3; i++){
+    for(let i = 0; i < 6; i++){
 
         try{
 
-            const start =
-                performance.now();
+            const start = performance.now();
 
             await fetch(
-                TEST_URL +
-                "?ping=" +
-                Math.random(),
+                "https://www.cloudflare.com/cdn-cgi/trace?" + Math.random(),
                 {
-                    method:"HEAD",
                     cache:"no-store"
                 }
             );
 
-            const ping =
-                performance.now() - start;
+            const ping = performance.now() - start;
 
             values.push(ping);
 
-        }catch(e){
-
-            console.log("PING FAIL");
+        }catch(err){
+            console.log(err);
         }
     }
 
-    if(values.length === 0){
+    if(!values.length){
 
         pingEl.innerText = "--";
+        jitterEl.innerText = "--";
+
         return;
     }
 
@@ -297,8 +436,19 @@ async function pingTest(){
         values.reduce((a,b)=>a+b,0)
         / values.length;
 
-    pingEl.innerText =
-        Math.round(avg);
+    let jitter = 0;
+
+    for(let i = 1; i < values.length; i++){
+
+        jitter += Math.abs(
+            values[i] - values[i - 1]
+        );
+    }
+
+    jitter /= values.length - 1;
+
+    pingEl.innerText = Math.round(avg);
+    jitterEl.innerText = Math.round(jitter);
 }
 
 /* =========================
@@ -309,23 +459,22 @@ async function speedTest(){
 
     try{
 
-        const response =
-            await fetch(
-                TEST_URL +
-                "?cache=" +
-                Date.now(),
-                {
-                    cache:"no-store"
-                }
-            );
+        statusEl.innerText = "TESTING DOWNLOAD...";
 
-        const reader =
-            response.body.getReader();
+        const response = await fetch(
+            TEST_URL + "&cache=" + Date.now(),
+            {
+                cache:"no-store"
+            }
+        );
+
+        const reader = response.body.getReader();
 
         let received = 0;
 
-        const startTime =
-            performance.now();
+        const start = performance.now();
+
+        let smoothSpeed = 0;
 
         while(true){
 
@@ -337,106 +486,72 @@ async function speedTest(){
             received += value.length;
 
             const elapsed =
-                performance.now() - startTime;
+                performance.now() - start;
 
-            /*
-                Прогрев
-            */
+            const progress = Math.min(
+                (elapsed / TEST_DURATION) * 100,
+                100
+            );
 
-            if(elapsed < WARMUP_TIME){
+            loader.style.width = progress + "%";
 
-                loader.style.width =
-                    (
-                        elapsed /
-                        TEST_DURATION
-                    ) * 100 + "%";
-
+            if(elapsed < WARMUP){
                 continue;
             }
 
-            /*
-                Настоящее время теста
-            */
+            const seconds =
+                (elapsed - WARMUP) / 1000;
 
-            const realSeconds =
-                (elapsed - WARMUP_TIME)
-                / 1000;
-
-            /*
-                Mbps
-            */
-
-            let speed =
-                (
-                    (received * 8)
-                    / realSeconds
-                )
+            let speedMbps =
+                ((received * 8) / seconds)
                 / 1024
                 / 1024;
 
             /*
-                Стабилизация
+                Сглаживание.
+                Убирает безумные скачки.
             */
 
-            speed *= STABILIZER;
-
-            /*
-                Ограничение скачков
-            */
-
-            speed =
-                Math.max(
-                    0,
-                    Math.min(speed,999)
-                );
-
-            /*
-                UI
-            */
+            smoothSpeed =
+                smoothSpeed
+                ? (smoothSpeed * 0.75 + speedMbps * 0.25)
+                : speedMbps;
 
             speedEl.innerText =
-                speed.toFixed(2);
-
-            loader.style.width =
-                Math.min(
-                    (
-                        elapsed /
-                        TEST_DURATION
-                    ) * 100,
-                    100
-                ) + "%";
-
-            /*
-                Автостоп
-            */
+                smoothSpeed.toFixed(1);
 
             if(elapsed >= TEST_DURATION){
-
                 break;
             }
         }
 
-    }catch(e){
+        statusEl.innerText = "TEST COMPLETE";
 
-        console.error(e);
+    }catch(err){
+
+        console.error(err);
 
         speedEl.innerText = "ERR";
+
+        statusEl.innerText = "NETWORK ERROR";
     }
 }
 
 /* =========================
-   START TEST
+   RUN
 ========================= */
 
 async function runTest(){
 
     startBtn.disabled = true;
 
-    pingEl.innerText = "...";
+    loader.style.width = "0%";
 
+    pingEl.innerText = "...";
+    jitterEl.innerText = "...";
     speedEl.innerText = "0";
 
-    loader.style.width = "0%";
+    statusEl.innerText = "INITIALIZING";
 
     await pingTest();
 
@@ -445,7 +560,7 @@ async function runTest(){
     startBtn.disabled = false;
 
     startBtn.innerHTML =
-        'RESTART<div class="loader" style="width:100%"></div>';
+        'RESTART TEST<div id="loader" class="loader" style="width:100%"></div>';
 }
 
 startBtn.addEventListener(
@@ -454,135 +569,44 @@ startBtn.addEventListener(
 );
 
 /* =========================
-   MATRIX SNAKE
+   MATRIX BACKGROUND
 ========================= */
 
-const canvas =
-    document.getElementById("snakeCanvas");
-
-const ctx =
-    canvas.getContext("2d");
-
-const tile = 20;
-
-let snake = [
-    {x:10,y:10},
-    {x:9,y:10}
-];
-
-let foods = [
-    {x:15,y:15}
-];
-
-let dx = 1;
-let dy = 0;
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
 
 function resize(){
-
     canvas.width = innerWidth;
     canvas.height = innerHeight;
 }
 
-addEventListener(
-    "resize",
-    resize
-);
-
 resize();
+addEventListener("resize", resize);
 
-function updateSnake(){
+const chars =
+    "01アイウエオカサタナABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    const w =
-        Math.floor(canvas.width / tile);
+const fontSize = 16;
 
-    const h =
-        Math.floor(canvas.height / tile);
+let columns = [];
 
-    const head =
-        {...snake[0]};
+function setupColumns(){
 
-    let target =
-        foods[0];
+    const count =
+        Math.floor(canvas.width / fontSize);
 
-    let minDist =
-        Infinity;
+    columns = [];
 
-    for(const food of foods){
-
-        const dist =
-            Math.abs(head.x - food.x)
-            +
-            Math.abs(head.y - food.y);
-
-        if(dist < minDist){
-
-            minDist = dist;
-            target = food;
-        }
-    }
-
-    if(head.x < target.x && dx !== -1){
-
-        dx = 1;
-        dy = 0;
-    }
-    else if(head.x > target.x && dx !== 1){
-
-        dx = -1;
-        dy = 0;
-    }
-    else if(head.y < target.y && dy !== -1){
-
-        dx = 0;
-        dy = 1;
-    }
-    else if(head.y > target.y && dy !== 1){
-
-        dx = 0;
-        dy = -1;
-    }
-
-    const next = {
-        x:(head.x + dx + w) % w,
-        y:(head.y + dy + h) % h
-    };
-
-    snake.unshift(next);
-
-    let ate = false;
-
-    foods = foods.filter(food=>{
-
-        if(
-            food.x === next.x &&
-            food.y === next.y
-        ){
-            ate = true;
-            return false;
-        }
-
-        return true;
-    });
-
-    if(ate){
-
-        for(let i=0;i<2;i++){
-
-            foods.push({
-                x:Math.floor(Math.random()*w),
-                y:Math.floor(Math.random()*h)
-            });
-        }
-
-    }else{
-
-        snake.pop();
+    for(let i = 0; i < count; i++){
+        columns[i] = Math.random() * -100;
     }
 }
 
-function draw(){
+setupColumns();
 
-    ctx.fillStyle = "#010401";
+function drawMatrix(){
+
+    ctx.fillStyle = "rgba(2,3,8,.08)";
 
     ctx.fillRect(
         0,
@@ -591,68 +615,34 @@ function draw(){
         canvas.height
     );
 
-    /* FOOD */
+    ctx.fillStyle = "#00ff7b";
 
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = "#ff003c";
+    ctx.font = fontSize + "px JetBrains Mono";
 
-    ctx.fillStyle = "#ff003c";
+    for(let i = 0; i < columns.length; i++){
 
-    for(const food of foods){
+        const text =
+            chars[
+                Math.floor(Math.random() * chars.length)
+            ];
 
-        ctx.fillRect(
-            food.x * tile + 4,
-            food.y * tile + 4,
-            tile - 8,
-            tile - 8
-        );
+        const x = i * fontSize;
+        const y = columns[i] * fontSize;
+
+        ctx.fillText(text, x, y);
+
+        if(y > canvas.height && Math.random() > .985){
+            columns[i] = 0;
+        }
+
+        columns[i]++;
     }
 
-    /* SNAKE */
-
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = "#00ff41";
-
-    snake.forEach((part,index)=>{
-
-        ctx.fillStyle =
-            index === 0
-            ? "#00ff41"
-            : "#003b00";
-
-        ctx.fillRect(
-            part.x * tile + 1,
-            part.y * tile + 1,
-            tile - 2,
-            tile - 2
-        );
-    });
-
-    ctx.shadowBlur = 0;
+    requestAnimationFrame(drawMatrix);
 }
 
-let last = 0;
-
-function animate(time){
-
-    if(time - last > 70){
-
-        updateSnake();
-
-        draw();
-
-        last = time;
-    }
-
-    requestAnimationFrame(
-        animate
-    );
-}
-
-requestAnimationFrame(
-    animate
-);
+drawMatrix();
 </script>
-
 </body>
 </html>
+
