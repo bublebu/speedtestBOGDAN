@@ -1,6 +1,4 @@
-# Улучшенная версия speedtestBOGDAN
 
-```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -356,7 +354,7 @@ const startBtn=document.getElementById("startBtn")
 const loader=document.getElementById("loader")
 const statusEl=document.getElementById("status")
 
-const TEST_URL="https://speed.cloudflare.com/__down?bytes=50000000"
+const TEST_URL="https://cachefly.cachefly.net/20mb.test"
 const TEST_DURATION=12000
 const WARMUP=1500
 
@@ -368,8 +366,11 @@ try{
 const start=performance.now()
 
 await fetch(
-"https://www.cloudflare.com/cdn-cgi/trace?"+Math.random(),
-{cache:"no-store"}
+TEST_URL+"?ping="+Math.random(),
+{
+method:"HEAD",
+cache:"no-store"
+}
 )
 
 values.push(performance.now()-start)
@@ -523,6 +524,3 @@ matrix()
 </script>
 </body>
 </html>
-
-
-
