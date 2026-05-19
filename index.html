@@ -1,648 +1,528 @@
+# Улучшенная версия speedtestBOGDAN
 
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>speedtestBOGDAN</title>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
-
 <style>
 :root{
-    --bg:#020308;
-    --panel:#08110d;
-    --card:#0b1611;
-    --accent:#00ff7b;
-    --accent2:#00c853;
-    --red:#ff1744;
-    --text:#ecfff2;
-    --muted:#6bd48e;
+--bg:#03050a;
+--panel:#09120f;
+--card:#101b16;
+--accent:#00ff88;
+--accent2:#00c853;
+--text:#effff5;
+--muted:#72d89a;
+--red:#ff2957;
 }
 
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+margin:0;
+padding:0;
+box-sizing:border-box;
 }
 
 html,
 body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:radial-gradient(circle at top,#07150e 0%,#020308 55%);
-    font-family:'JetBrains Mono', monospace;
-    color:var(--text);
+width:100%;
+height:100%;
+overflow:hidden;
+font-family:'JetBrains Mono',monospace;
+background:radial-gradient(circle at top,#0b1d15 0%,#03050a 60%);
+color:var(--text);
 }
 
 body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
+display:flex;
+justify-content:center;
+align-items:center;
 }
 
-#bg{
-    position:fixed;
-    inset:0;
-    z-index:1;
+canvas{
+position:fixed;
+inset:0;
+z-index:1;
 }
 
 .panel{
-    position:relative;
-    z-index:5;
-
-    width:370px;
-
-    padding:30px;
-
-    border-radius:30px;
-
-    background:rgba(8,15,11,.82);
-
-    border:1px solid rgba(0,255,123,.18);
-
-    backdrop-filter:blur(18px);
-
-    box-shadow:
-        0 0 60px rgba(0,255,123,.08),
-        inset 0 0 20px rgba(0,255,123,.04);
+position:relative;
+z-index:5;
+width:390px;
+padding:30px;
+border-radius:34px;
+background:rgba(7,13,11,.82);
+backdrop-filter:blur(24px);
+border:1px solid rgba(0,255,136,.12);
+box-shadow:
+0 0 80px rgba(0,255,136,.08),
+inset 0 0 40px rgba(0,255,136,.03);
+overflow:hidden;
 }
 
 .panel::before{
-    content:"";
-
-    position:absolute;
-    inset:0;
-
-    border-radius:30px;
-
-    padding:1px;
-
-    background:linear-gradient(
-        140deg,
-        rgba(0,255,123,.4),
-        transparent,
-        rgba(0,255,123,.2)
-    );
-
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-
-    -webkit-mask-composite:xor;
-
-    pointer-events:none;
+content:"";
+position:absolute;
+inset:-1px;
+border-radius:34px;
+padding:1px;
+background:linear-gradient(145deg,rgba(0,255,136,.35),transparent,rgba(0,255,136,.15));
+-webkit-mask:
+linear-gradient(#fff 0 0) content-box,
+linear-gradient(#fff 0 0);
+-webkit-mask-composite:xor;
+pointer-events:none;
 }
 
 .logo{
-    text-align:center;
-    margin-bottom:30px;
+text-align:center;
+margin-bottom:28px;
 }
 
 .logo h1{
-    font-size:1rem;
-    letter-spacing:6px;
-    color:var(--accent);
-    text-shadow:0 0 18px rgba(0,255,123,.7);
+font-size:1.1rem;
+letter-spacing:7px;
+color:var(--accent);
+text-shadow:0 0 20px rgba(0,255,136,.7);
 }
 
 .logo p{
-    margin-top:8px;
-    color:#61c98c;
-    font-size:.62rem;
-    letter-spacing:2px;
+margin-top:8px;
+font-size:.62rem;
+letter-spacing:2px;
+color:#70cb97;
 }
 
-.grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    margin-bottom:14px;
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:14px;
+margin-bottom:16px;
 }
 
 .card{
-    position:relative;
-
-    overflow:hidden;
-
-    background:linear-gradient(
-        180deg,
-        rgba(14,25,18,.92),
-        rgba(8,15,11,.9)
-    );
-
-    border:1px solid rgba(0,255,123,.08);
-
-    border-radius:22px;
-
-    padding:18px;
-
-    min-height:125px;
-
-    box-shadow:
-        inset 0 0 20px rgba(0,255,123,.03);
+position:relative;
+overflow:hidden;
+background:linear-gradient(180deg,rgba(18,28,23,.92),rgba(9,15,12,.95));
+border-radius:24px;
+padding:20px;
+border:1px solid rgba(0,255,136,.07);
+min-height:120px;
 }
 
 .card::after{
-    content:"";
-
-    position:absolute;
-    top:0;
-    left:-100%;
-
-    width:100%;
-    height:100%;
-
-    background:linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,.05),
-        transparent
-    );
-
-    animation:shine 5s linear infinite;
+content:"";
+position:absolute;
+top:0;
+left:-120%;
+width:100%;
+height:100%;
+background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+animation:shine 4s linear infinite;
 }
 
 @keyframes shine{
-    100%{
-        left:120%;
-    }
+100%{
+left:130%;
+}
 }
 
 .label{
-    display:block;
-
-    color:var(--muted);
-
-    font-size:.62rem;
-
-    letter-spacing:2px;
-
-    margin-bottom:18px;
+display:block;
+margin-bottom:14px;
+font-size:.62rem;
+letter-spacing:2px;
+color:var(--muted);
 }
 
 .value{
-    font-size:2.4rem;
-    font-weight:800;
+font-size:2.5rem;
+font-weight:800;
 }
 
 .unit{
-    color:var(--accent);
-    font-size:.78rem;
+font-size:.78rem;
+color:var(--accent);
 }
 
-.bigCard{
-    margin-bottom:18px;
-
-    background:linear-gradient(
-        180deg,
-        rgba(16,32,22,.95),
-        rgba(8,15,11,.95)
-    );
-
-    border-radius:24px;
-
-    padding:24px;
-
-    border:1px solid rgba(0,255,123,.08);
+.speedCard{
+position:relative;
+overflow:hidden;
+background:linear-gradient(180deg,rgba(17,35,24,.96),rgba(8,14,11,.96));
+padding:28px;
+border-radius:28px;
+border:1px solid rgba(0,255,136,.08);
+margin-bottom:18px;
 }
 
-.speedMain{
-    display:flex;
-    align-items:flex-end;
-    gap:10px;
+.speedWrap{
+display:flex;
+align-items:flex-end;
+gap:12px;
 }
 
 #speed{
-    font-size:4rem;
-    line-height:1;
+font-size:4.5rem;
+line-height:1;
+text-shadow:0 0 20px rgba(0,255,136,.25);
 }
 
 .status{
-    margin-top:14px;
-    color:#79d89c;
-    font-size:.7rem;
-    letter-spacing:1px;
+margin-top:14px;
+font-size:.72rem;
+letter-spacing:1px;
+color:#7fdea3;
 }
 
 button{
-    position:relative;
-
-    width:100%;
-
-    border:none;
-
-    border-radius:18px;
-
-    padding:18px;
-
-    background:linear-gradient(
-        90deg,
-        var(--accent2),
-        var(--accent)
-    );
-
-    color:black;
-
-    font-family:inherit;
-
-    font-weight:800;
-
-    font-size:.9rem;
-
-    letter-spacing:2px;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    overflow:hidden;
-
-    box-shadow:
-        0 0 30px rgba(0,255,123,.25);
+position:relative;
+width:100%;
+padding:18px;
+border:none;
+border-radius:20px;
+background:linear-gradient(90deg,var(--accent2),var(--accent));
+color:black;
+font-family:inherit;
+font-weight:800;
+font-size:.9rem;
+letter-spacing:2px;
+cursor:pointer;
+overflow:hidden;
+transition:.25s;
+box-shadow:0 0 35px rgba(0,255,136,.22);
 }
 
 button:hover:not(:disabled){
-    transform:translateY(-2px) scale(1.01);
-
-    box-shadow:
-        0 0 40px rgba(0,255,123,.45);
+transform:translateY(-2px) scale(1.01);
+box-shadow:0 0 45px rgba(0,255,136,.38);
 }
 
 button:disabled{
-    opacity:.7;
-    cursor:wait;
+opacity:.75;
+cursor:wait;
 }
 
 .loader{
-    position:absolute;
+position:absolute;
+left:0;
+bottom:0;
+height:4px;
+width:0%;
+background:black;
+transition:width .15s linear;
+}
 
-    left:0;
-    bottom:0;
+.ad{
+margin-top:18px;
+padding:16px;
+border-radius:22px;
+background:linear-gradient(180deg,rgba(20,15,15,.92),rgba(12,10,10,.92));
+border:1px solid rgba(255,41,87,.12);
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+}
 
-    height:4px;
-    width:0%;
+.adInfo h3{
+font-size:.8rem;
+margin-bottom:6px;
+color:#ff6f91;
+}
 
-    background:black;
+.adInfo p{
+font-size:.6rem;
+color:#d7b4bf;
+line-height:1.5;
+}
 
-    transition:width .15s linear;
+.ad a{
+text-decoration:none;
+padding:12px 16px;
+border-radius:14px;
+background:#ff2957;
+color:white;
+font-size:.7rem;
+font-weight:800;
+letter-spacing:1px;
+transition:.2s;
+}
+
+.ad a:hover{
+transform:scale(1.05);
+box-shadow:0 0 20px rgba(255,41,87,.45);
 }
 
 .footer{
-    margin-top:14px;
-
-    text-align:center;
-
-    font-size:.55rem;
-
-    color:#5f8d6d;
-
-    letter-spacing:1px;
+margin-top:16px;
+text-align:center;
+font-size:.55rem;
+letter-spacing:1px;
+color:#547a63;
 }
 
 @media(max-width:480px){
+.panel{
+width:92%;
+padding:22px;
+}
 
-    .panel{
-        width:92%;
-        padding:22px;
-    }
+#speed{
+font-size:3.5rem;
+}
 
-    #speed{
-        font-size:3.2rem;
-    }
+.value{
+font-size:2rem;
+}
 
-    .value{
-        font-size:2rem;
-    }
+.ad{
+flex-direction:column;
+align-items:flex-start;
+}
 }
 </style>
 </head>
 <body>
-
 <canvas id="bg"></canvas>
 
 <div class="panel">
 
-    <div class="logo">
-        <h1>SPEEDTEST</h1>
-        <p>BOGDAN NETWORK ANALYZER</p>
-    </div>
+<div class="logo">
+<h1>SPEEDTEST</h1>
+<p>BOGDAN ULTRA NETWORK SYSTEM</p>
+</div>
 
-    <div class="grid">
+<div class="stats">
 
-        <div class="card">
-            <span class="label">PING</span>
+<div class="card">
+<span class="label">PING</span>
+<span id="ping" class="value">0</span>
+<span class="unit">ms</span>
+</div>
 
-            <span id="ping" class="value">0</span>
-            <span class="unit">ms</span>
-        </div>
+<div class="card">
+<span class="label">JITTER</span>
+<span id="jitter" class="value">0</span>
+<span class="unit">ms</span>
+</div>
 
-        <div class="card">
-            <span class="label">JITTER</span>
+</div>
 
-            <span id="jitter" class="value">0</span>
-            <span class="unit">ms</span>
-        </div>
+<div class="speedCard">
+<span class="label">DOWNLOAD SPEED</span>
 
-    </div>
+<div class="speedWrap">
+<span id="speed" class="value">0</span>
+<span class="unit">Mbps</span>
+</div>
 
-    <div class="bigCard">
+<div id="status" class="status">
+READY FOR TEST
+</div>
+</div>
 
-        <span class="label">DOWNLOAD SPEED</span>
+<button id="startBtn">
+START TEST
+<div id="loader" class="loader"></div>
+</button>
 
-        <div class="speedMain">
-            <span id="speed" class="value">0</span>
-            <span class="unit">Mbps</span>
-        </div>
+<div class="ad">
+<div class="adInfo">
+<h3>EBLANTALEE</h3>
+<p>indie atmospheric game on GameJolt</p>
+</div>
 
-        <div id="status" class="status">
-            READY FOR TEST
-        </div>
+<a href="https://gamejolt.com/games/EBLANTALEE/1036721" target="_blank">
+OPEN
+</a>
+</div>
 
-    </div>
-
-    <button id="startBtn">
-        START TEST
-        <div id="loader" class="loader"></div>
-    </button>
-
-    <div class="footer">
-        REALTIME NETWORK MEASUREMENT
-    </div>
+<div class="footer">
+REALTIME NETWORK ANALYZER
+</div>
 
 </div>
 
 <script>
-const pingEl = document.getElementById("ping");
-const jitterEl = document.getElementById("jitter");
-const speedEl = document.getElementById("speed");
-const startBtn = document.getElementById("startBtn");
-const loader = document.getElementById("loader");
-const statusEl = document.getElementById("status");
+const pingEl=document.getElementById("ping")
+const jitterEl=document.getElementById("jitter")
+const speedEl=document.getElementById("speed")
+const startBtn=document.getElementById("startBtn")
+const loader=document.getElementById("loader")
+const statusEl=document.getElementById("status")
 
-/*
-    Стабильный файл.
-    Не слишком маленький и не огромный.
-*/
-
-const TEST_URL =
-    "https://speed.cloudflare.com/__down?bytes=50000000";
-
-const TEST_DURATION = 12000;
-const WARMUP = 1500;
-
-/* =========================
-   PING + JITTER
-========================= */
+const TEST_URL="https://speed.cloudflare.com/__down?bytes=50000000"
+const TEST_DURATION=12000
+const WARMUP=1500
 
 async function pingTest(){
+const values=[]
 
-    const values = [];
+for(let i=0;i<6;i++){
+try{
+const start=performance.now()
 
-    for(let i = 0; i < 6; i++){
+await fetch(
+"https://www.cloudflare.com/cdn-cgi/trace?"+Math.random(),
+{cache:"no-store"}
+)
 
-        try{
-
-            const start = performance.now();
-
-            await fetch(
-                "https://www.cloudflare.com/cdn-cgi/trace?" + Math.random(),
-                {
-                    cache:"no-store"
-                }
-            );
-
-            const ping = performance.now() - start;
-
-            values.push(ping);
-
-        }catch(err){
-            console.log(err);
-        }
-    }
-
-    if(!values.length){
-
-        pingEl.innerText = "--";
-        jitterEl.innerText = "--";
-
-        return;
-    }
-
-    const avg =
-        values.reduce((a,b)=>a+b,0)
-        / values.length;
-
-    let jitter = 0;
-
-    for(let i = 1; i < values.length; i++){
-
-        jitter += Math.abs(
-            values[i] - values[i - 1]
-        );
-    }
-
-    jitter /= values.length - 1;
-
-    pingEl.innerText = Math.round(avg);
-    jitterEl.innerText = Math.round(jitter);
+values.push(performance.now()-start)
+}catch(err){}
 }
 
-/* =========================
-   SPEED TEST
-========================= */
+if(!values.length){
+pingEl.innerText="--"
+jitterEl.innerText="--"
+return
+}
+
+const avg=
+values.reduce((a,b)=>a+b,0)
+/values.length
+
+let jitter=0
+
+for(let i=1;i<values.length;i++){
+jitter+=Math.abs(values[i]-values[i-1])
+}
+
+jitter/=(values.length-1)
+
+pingEl.innerText=Math.round(avg)
+jitterEl.innerText=Math.round(jitter)
+}
 
 async function speedTest(){
+try{
+statusEl.innerText="TESTING DOWNLOAD"
 
-    try{
+const response=await fetch(
+TEST_URL+"&cache="+Date.now(),
+{cache:"no-store"}
+)
 
-        statusEl.innerText = "TESTING DOWNLOAD...";
+const reader=response.body.getReader()
 
-        const response = await fetch(
-            TEST_URL + "&cache=" + Date.now(),
-            {
-                cache:"no-store"
-            }
-        );
+let received=0
+const start=performance.now()
+let smooth=0
 
-        const reader = response.body.getReader();
+while(true){
+const {done,value}=await reader.read()
 
-        let received = 0;
+if(done)break
 
-        const start = performance.now();
+received+=value.length
 
-        let smoothSpeed = 0;
+const elapsed=performance.now()-start
 
-        while(true){
+loader.style.width=
+Math.min((elapsed/TEST_DURATION)*100,100)+"%"
 
-            const {done, value} =
-                await reader.read();
+if(elapsed<WARMUP)continue
 
-            if(done) break;
+const seconds=(elapsed-WARMUP)/1000
 
-            received += value.length;
+const speed=
+((received*8)/seconds)
+/1024
+/1024
 
-            const elapsed =
-                performance.now() - start;
+smooth=
+smooth
+?(smooth*0.72+speed*0.28)
+:speed
 
-            const progress = Math.min(
-                (elapsed / TEST_DURATION) * 100,
-                100
-            );
+speedEl.innerText=smooth.toFixed(1)
 
-            loader.style.width = progress + "%";
-
-            if(elapsed < WARMUP){
-                continue;
-            }
-
-            const seconds =
-                (elapsed - WARMUP) / 1000;
-
-            let speedMbps =
-                ((received * 8) / seconds)
-                / 1024
-                / 1024;
-
-            /*
-                Сглаживание.
-                Убирает безумные скачки.
-            */
-
-            smoothSpeed =
-                smoothSpeed
-                ? (smoothSpeed * 0.75 + speedMbps * 0.25)
-                : speedMbps;
-
-            speedEl.innerText =
-                smoothSpeed.toFixed(1);
-
-            if(elapsed >= TEST_DURATION){
-                break;
-            }
-        }
-
-        statusEl.innerText = "TEST COMPLETE";
-
-    }catch(err){
-
-        console.error(err);
-
-        speedEl.innerText = "ERR";
-
-        statusEl.innerText = "NETWORK ERROR";
-    }
+if(elapsed>=TEST_DURATION)break
 }
 
-/* =========================
-   RUN
-========================= */
+statusEl.innerText="COMPLETE"
+
+}catch(err){
+speedEl.innerText="ERR"
+statusEl.innerText="NETWORK ERROR"
+}
+}
 
 async function runTest(){
+startBtn.disabled=true
+loader.style.width="0%"
 
-    startBtn.disabled = true;
+pingEl.innerText="..."
+jitterEl.innerText="..."
+speedEl.innerText="0"
 
-    loader.style.width = "0%";
+statusEl.innerText="INITIALIZING"
 
-    pingEl.innerText = "...";
-    jitterEl.innerText = "...";
-    speedEl.innerText = "0";
+await pingTest()
+await speedTest()
 
-    statusEl.innerText = "INITIALIZING";
-
-    await pingTest();
-
-    await speedTest();
-
-    startBtn.disabled = false;
-
-    startBtn.innerHTML =
-        'RESTART TEST<div id="loader" class="loader" style="width:100%"></div>';
+startBtn.disabled=false
 }
 
-startBtn.addEventListener(
-    "click",
-    runTest
-);
+startBtn.addEventListener("click",runTest)
 
-/* =========================
-   MATRIX BACKGROUND
-========================= */
-
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("bg")
+const ctx=canvas.getContext("2d")
 
 function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+canvas.width=innerWidth
+canvas.height=innerHeight
 }
 
-resize();
-addEventListener("resize", resize);
+resize()
+addEventListener("resize",resize)
 
-const chars =
-    "01アイウエオカサタナABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const chars="01アイウエオカサタナABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const size=16
+let columns=[]
 
-const fontSize = 16;
+function init(){
+columns=[]
 
-let columns = [];
-
-function setupColumns(){
-
-    const count =
-        Math.floor(canvas.width / fontSize);
-
-    columns = [];
-
-    for(let i = 0; i < count; i++){
-        columns[i] = Math.random() * -100;
-    }
+for(let i=0;i<canvas.width/size;i++){
+columns[i]=Math.random()*-100
+}
 }
 
-setupColumns();
+init()
 
-function drawMatrix(){
+function matrix(){
+ctx.fillStyle="rgba(3,5,10,.08)"
+ctx.fillRect(0,0,canvas.width,canvas.height)
 
-    ctx.fillStyle = "rgba(2,3,8,.08)";
+ctx.fillStyle="#00ff88"
+ctx.font=size+"px JetBrains Mono"
 
-    ctx.fillRect(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-    );
+for(let i=0;i<columns.length;i++){
+const text=chars[Math.floor(Math.random()*chars.length)]
+const x=i*size
+const y=columns[i]*size
 
-    ctx.fillStyle = "#00ff7b";
+ctx.fillText(text,x,y)
 
-    ctx.font = fontSize + "px JetBrains Mono";
-
-    for(let i = 0; i < columns.length; i++){
-
-        const text =
-            chars[
-                Math.floor(Math.random() * chars.length)
-            ];
-
-        const x = i * fontSize;
-        const y = columns[i] * fontSize;
-
-        ctx.fillText(text, x, y);
-
-        if(y > canvas.height && Math.random() > .985){
-            columns[i] = 0;
-        }
-
-        columns[i]++;
-    }
-
-    requestAnimationFrame(drawMatrix);
+if(y>canvas.height&&Math.random()>.985){
+columns[i]=0
 }
 
-drawMatrix();
+columns[i]++
+}
+
+requestAnimationFrame(matrix)
+}
+
+matrix()
 </script>
 </body>
 </html>
+
+
 
